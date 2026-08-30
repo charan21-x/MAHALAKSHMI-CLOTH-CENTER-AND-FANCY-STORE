@@ -1,91 +1,7 @@
-//
-// Fashion Store Frontend Script
-//
-// Cart Count
-let cartCount=0;
-// Select all Add To Cart buttons
-const cartButtons=document.querySelectorAll("button");
-// Add To Cart Function
-cartButtons.forEach((button)=> {
-    button.addEventListener("click", ()=> {
-        cartCount++;
-        alert("Product Added To Cart");
-        console.log("Total Cart Items:", cartCount);
-    }
-    );
-}
+/* ==============================
+   Products Section
+============================== */
 
-);
-// Smooth Scroll For Shop Button
-const shopNowBtn=document.querySelector(".btn");
-shopNowBtn.addEventListener("click", (e)=> {
-    e.preventDefault();
-    document.querySelector(".products").scrollIntoView( {
-        behavior: "smooth"
-    }
-    );
-}
-
-);
-// Footer Dynamic Year
-const footerText=document.querySelector("footer p");
-const currentYear=new Date().getFullYear();
-footerText.innerHTML=`© $ {
-    currentYear
-}
-
-Fashion Store | All Rights Reserved`;
-// Product Data Example
-const products=[ {
-    name: "Stylish T-Shirt", price: "₹799"
-}
-
-,
-{
-    name: "Fashion Hoodie", price: "₹1499"
-}
-
-,
-{
-    name: "Casual Jacket", price: "₹2499"
-}
-
-,
-{
-    name: "Modern Jeans", price: "₹1999"
-}
-
-];
-// Show Products In Console
-console.log("Available Products:");
-products.forEach((product, index)=> {
-    console.log( `$ {
-        index + 1
-    }
-    . $ {
-        product.name
-    }
-    - $ {
-        product.price
-    }
-    `);
-}
-
-);
-// Example Backend API Fetch
-async function fetchProducts() {
-    try {
-        const response=await fetch( "http://localhost:5000/products");
-        const data=await response.json();
-        console.log("Backend Products:", data);
-    }
-    catch (error) {
-        console.log("Server Error:", error);
-    }
-}
-
-// Call Function
-fetchProducts();
 #products {
     display: flex;
     flex-wrap: wrap;
@@ -93,14 +9,24 @@ fetchProducts();
     padding: 20px;
 }
 
+
+/* ==============================
+   Product Card
+============================== */
+
 .product-card {
     width: 250px;
-    background: white;
+    background: rgb(59, 165, 194);
     border-radius: 10px;
     padding: 15px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
     text-align: center;
 }
+
+
+/* ==============================
+   Product Card Button
+============================== */
 
 .product-card button {
     background: #ff4081;
@@ -109,4 +35,25 @@ fetchProducts();
     padding: 10px;
     border-radius: 5px;
     cursor: pointer;
+}
+
+
+/* ==============================
+   Button Hover
+============================== */
+
+.product-card button:hover {
+    background: #e91e63;
+}
+
+
+/* ==============================
+   Products Container
+============================== */
+
+.products {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
 }

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Product Management</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Product Management</h1>
+      <p>MAHALAKSHMI CLOTH CENTER AND FANCY STORE</p>
+    </div>
+    <button id="logoutBtn" class="secondary">Logout</button>
+  </header>
+
+  <main class="container">
+    <section id="loginSection" class="card">
+      <h2>Admin Login</h2>
+      <form id="loginForm">
+        <label>Username<input id="username" required autocomplete="username"></label>
+        <label>Password<input id="password" type="password" required autocomplete="current-password"></label>
+        <button type="submit">Login</button>
+        <p id="loginMessage" class="message"></p>
+      </form>
+    </section>
+
+    <section id="adminSection" hidden>
+      <div class="stats">
+        <div class="stat"><span>Total</span><strong id="totalCount">0</strong></div>
+        <div class="stat"><span>In Stock</span><strong id="stockCount">0</strong></div>
+        <div class="stat"><span>Out of Stock</span><strong id="outStockCount">0</strong></div>
+      </div>
+
+      <section class="card">
+        <div class="section-title">
+          <h2 id="formTitle">Add Product</h2>
+          <button id="cancelEditBtn" class="secondary" hidden>Cancel Edit</button>
+        </div>
+
+        <form id="productForm" class="product-form">
+          <input type="hidden" id="productId">
+          <label>Product Name<input id="name" required maxlength="150"></label>
+          <label>Category<input id="category" required maxlength="80" placeholder="Saree, Necklace, Fancy Item"></label>
+          <label>Price (₹)<input id="price" type="number" min="0" step="0.01" required></label>
+          <label>Stock<input id="stock" type="number" min="0" step="1" required></label>
+          <label class="full">Image URL<input id="image" type="url" placeholder="https://example.com/product.jpg"></label>
+          <label class="full">Description<textarea id="description" rows="4" maxlength="1000"></textarea></label>
+          <label class="check full"><input id="isActive" type="checkbox" checked> Show product in store</label>
+          <button type="submit" id="saveBtn" class="full">Add Product</button>
+          <p id="formMessage" class="message full"></p>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="section-title">
+          <h2>Products</h2>
+          <button id="refreshBtn" class="secondary">Refresh</button>
+        </div>
+        <input id="searchBox" class="search" placeholder="Search products...">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Image</th><th>Name</th><th>Category</th><th>Price</th>
+                <th>Stock</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="productTable"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>
