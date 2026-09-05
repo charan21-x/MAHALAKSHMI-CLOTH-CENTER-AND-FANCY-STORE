@@ -8,7 +8,63 @@ a{text-decoration:none;color:inherit}.top{background:linear-gradient(100deg,#061
 .field{margin:14px 0}.field label{display:block;font-weight:800;margin-bottom:7px}.field input,.field textarea,.field select{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:11px;background:white;font-size:15px}.field input:focus,.field textarea:focus{outline:2px solid #93c5fd;box-shadow:0 10px 25px #0b57d01a}.address-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}.pay-option{display:flex;align-items:center;gap:10px;border:1px solid #cbd5e1;border-radius:13px;padding:15px;margin:10px 0;background:#fff;cursor:pointer}.pay-option:has(input:checked){border:2px solid #0b57d0;background:#eff6ff;box-shadow:0 10px 25px #0b57d01c}.summary{display:grid;grid-template-columns:1fr auto;gap:10px;padding:18px;border-radius:15px;background:#f8fafc;margin:18px 0}.success{text-align:center;padding:50px}.success-icon{font-size:72px;animation:pop .7s ease}.timeline{display:grid;gap:0}.track{display:grid;grid-template-columns:42px 1fr;gap:15px;min-height:85px}.dot{width:20px;height:20px;border-radius:50%;background:#cbd5e1;margin-top:3px;box-shadow:0 0 0 7px #e2e8f0}.track.done .dot{background:#16a34a;box-shadow:0 0 0 7px #dcfce7}.line{width:3px;background:#cbd5e1;height:65px;margin:7px 0 0 8px}.track.done .line{background:#86efac}.order-card{display:grid;grid-template-columns:1fr auto;gap:15px;margin:15px 0;padding:18px;border-radius:16px;background:white;box-shadow:0 12px 35px #0f172a12}.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#dcfce7;color:#15803d;font-size:12px;font-weight:900}.muted{color:var(--muted)}.row{display:flex;gap:12px;justify-content:flex-end;margin-top:20px}.danger{color:#b91c1c}.footer{text-align:center;color:#64748b;padding:35px}
 @keyframes pop{0%{transform:scale(.4) rotateY(90deg);opacity:0}70%{transform:scale(1.15) rotateY(-8deg)}100%{transform:scale(1);opacity:1}}
 @media(max-width:650px){.top{flex-wrap:wrap}.nav{margin-left:0;width:100%;justify-content:space-between}.hero{padding:28px;min-height:380px}.address-grid{grid-template-columns:1fr}.full{grid-column:auto}.steps{overflow:auto}.step{min-width:120px}.order-card{grid-template-columns:1fr}.row{justify-content:stretch}.row .btn{flex:1}}
+
+.auth-box{max-width:560px;margin:28px auto}.auth-actions{display:flex;gap:10px;flex-wrap:wrap}.auth-actions .btn{flex:1}.hidden{display:none!important}.otp-note{padding:12px;border-radius:12px;background:#eff6ff;color:#1e3a8a;margin:12px 0}.logout{background:#fee2e2!important;color:#991b1b!important;box-shadow:none!important}.message{font-weight:800;min-height:22px;margin-top:12px}.ok{color:#15803d}.danger-text{color:#b91c1c}.phone-chip{display:inline-block;padding:7px 10px;border-radius:999px;background:#e0e7ff;color:#3730a3;font-weight:800;margin-bottom:15px}
 </style></head><body>
 <header class="top"><a class="logo" href="index.html">MAHALAKSHIMI ✦ STORE</a><nav class="nav"><a href="index.html">Shop</a><a href="orders.html">My Orders</a></nav></header>
-<main class="wrap"><h1>📦 My Orders</h1><p class="muted">Your recent orders and delivery status.</p><section id="orders"></section></main><div class="footer">Secure shopping • Fast delivery • Easy order tracking</div><script>
-const api="https://mahalakshmi-backend-wy3h.onrender.com";async function load(){const box=document.getElementById("orders");try{const r=await fetch(api+"/orders");if(!r.ok)throw Error();const a=await r.json();if(!a.length){box.innerHTML='<div class="panel">No orders yet.</div>';return}box.innerHTML=a.map((o,i)=>`<article class="order-card"><div><h3>${esc(o.productName||"Product")}</h3><p>Order ID: ${esc(o._id)}</p><p class="muted">${esc(o.customerName||"")} • ${esc(o.city||"")}</p><span class="pill">${esc(o.orderStatus||"Placed")}</span></div><div><h3>₹${Number(o.price||0).toLocaleString("en-IN")}</h3><a class="btn" href="order-track.html?id=${encodeURIComponent(o._id)}">Track Order</a></div></article>`).join("")}catch(e){box.innerHTML='<div class="panel">Could not load orders.</div>'}}function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}load();</script></body></html>
+<main class="wrap">
+  <section id="loginPanel" class="panel auth-box">
+    <h2>📱 Mobile Login</h2>
+    <p class="muted">Enter the same mobile number used while placing the order. OTP verification is required.</p>
+    <div id="phoneStep">
+      <div class="field"><label>Mobile Number</label><input id="loginPhone" maxlength="10" inputmode="numeric" placeholder="10-digit mobile number"></div>
+      <button id="sendOtpBtn" class="btn" style="background:#0b57d0;color:white;width:100%">Send OTP</button>
+    </div>
+    <div id="otpStep" class="hidden">
+      <div class="otp-note">OTP was sent to <b id="maskedPhone"></b></div>
+      <div class="field"><label>OTP</label><input id="otp" maxlength="10" inputmode="numeric" placeholder="Enter OTP"></div>
+      <div class="auth-actions"><button id="verifyOtpBtn" class="btn" style="background:#0b57d0;color:white">Verify & Login</button><button id="changePhoneBtn" class="btn">Change Number</button></div>
+    </div>
+    <p id="authMessage" class="message"></p>
+  </section>
+
+  <section id="ordersPanel" class="hidden">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+      <div><h1>📦 My Orders</h1><span id="phoneChip" class="phone-chip"></span></div>
+      <button id="logoutBtn" class="btn logout">Logout</button>
+    </div>
+    <p class="muted">Only orders linked to your verified mobile number are shown here.</p>
+    <section id="orders"></section>
+  </section>
+</main>
+<div class="footer">Secure shopping • Fast delivery • Private order history</div>
+<script>
+const API="https://mahalakshmi-backend-wy3h.onrender.com";
+const TOKEN_KEY="customerOrderToken";
+const PHONE_KEY="customerOrderPhone";
+let currentPhone="";
+const el=id=>document.getElementById(id);
+function cleanPhone(v){return String(v||"").replace(/\D/g,"").slice(-10)}
+function esc(v){return String(v||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;")}
+function showLogin(){el("loginPanel").classList.remove("hidden");el("ordersPanel").classList.add("hidden")}
+function showOrders(){el("loginPanel").classList.add("hidden");el("ordersPanel").classList.remove("hidden");const p=sessionStorage.getItem(PHONE_KEY)||"";el("phoneChip").textContent=p?"Verified: ••••••"+p.slice(-4):"Verified mobile";loadOrders()}
+async function sendOtp(){
+  const phone=cleanPhone(el("loginPhone").value);
+  if(!/^[6-9][0-9]{9}$/.test(phone)){el("authMessage").textContent="Enter a valid 10-digit Indian mobile number.";return}
+  currentPhone=phone;el("sendOtpBtn").disabled=true;el("authMessage").textContent="Sending OTP...";
+  try{const r=await fetch(API+"/customer/auth/send-otp",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({phone})});const d=await r.json();if(!r.ok)throw Error(d.message||"Could not send OTP");el("phoneStep").classList.add("hidden");el("otpStep").classList.remove("hidden");el("maskedPhone").textContent="******"+phone.slice(-4);el("authMessage").textContent="OTP sent.";el("authMessage").className="message ok";el("otp").focus()}catch(e){el("authMessage").textContent=e.message;el("authMessage").className="message danger-text"}finally{el("sendOtpBtn").disabled=false}
+}
+async function verifyOtp(){
+  const code=String(el("otp").value||"").replace(/\D/g,"");if(!currentPhone||code.length<4){el("authMessage").textContent="Enter the OTP.";return}
+  el("verifyOtpBtn").disabled=true;el("authMessage").textContent="Verifying...";
+  try{const r=await fetch(API+"/customer/auth/verify-otp",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({phone:currentPhone,code})});const d=await r.json();if(!r.ok)throw Error(d.message||"OTP verification failed");sessionStorage.setItem(TOKEN_KEY,d.token);sessionStorage.setItem(PHONE_KEY,d.phone||currentPhone);const track=new URLSearchParams(location.search).get("track");if(track&&/^[a-fA-F0-9]{24}$/.test(track)){location.href="order-track.html?id="+encodeURIComponent(track);return}showOrders()}catch(e){el("authMessage").textContent=e.message;el("authMessage").className="message danger-text"}finally{el("verifyOtpBtn").disabled=false}
+}
+function changePhone(){currentPhone="";el("otp").value="";el("otpStep").classList.add("hidden");el("phoneStep").classList.remove("hidden");el("authMessage").textContent="";el("loginPhone").focus()}
+async function loadOrders(){
+  const box=el("orders");box.innerHTML='<div class="panel">Loading your orders...</div>';const token=sessionStorage.getItem(TOKEN_KEY);if(!token){showLogin();return}
+  try{const r=await fetch(API+"/customer/orders",{headers:{Authorization:"Bearer "+token}});const a=await r.json();if(r.status===401){logout();return}if(!r.ok)throw Error(a.message||"Could not load orders");if(!a.length){box.innerHTML='<div class="panel">No orders found for this verified mobile number.</div>';return}box.innerHTML=a.map(o=>`<article class="order-card"><div><h3>${esc(o.productName||"Product")}</h3><p>Order ID: ${esc(o._id)}</p><p class="muted">${esc(o.customerName||"")} • ${esc(o.city||"")}</p><span class="pill">${esc(o.orderStatus||"Placed")}</span></div><div><h3>₹${Number(o.price||0).toLocaleString("en-IN")}</h3><a class="btn" href="order-track.html?id=${encodeURIComponent(o._id)}">Track Order</a></div></article>`).join("")}catch(e){box.innerHTML='<div class="panel danger-text">'+esc(e.message)+'</div>'}
+}
+function logout(){sessionStorage.removeItem(TOKEN_KEY);sessionStorage.removeItem(PHONE_KEY);location.href="orders.html"}
+el("sendOtpBtn").addEventListener("click",sendOtp);el("verifyOtpBtn").addEventListener("click",verifyOtp);el("changePhoneBtn").addEventListener("click",changePhone);el("logoutBtn").addEventListener("click",logout);el("loginPhone").addEventListener("keydown",e=>{if(e.key==="Enter")sendOtp()});el("otp").addEventListener("keydown",e=>{if(e.key==="Enter")verifyOtp()});
+if(sessionStorage.getItem(TOKEN_KEY)){const track=new URLSearchParams(location.search).get("track");if(track&&/^[a-fA-F0-9]{24}$/.test(track))location.href="order-track.html?id="+encodeURIComponent(track);else showOrders()}else showLogin();
+</script></body></html>

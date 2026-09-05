@@ -20,8 +20,10 @@ const api="https://mahalakshmi-backend-wy3h.onrender.com";const d=JSON.parse(ses
 document.getElementById("summary").innerHTML=`<div class="summary"><span>${esc(d.product.name)} × 1</span><b>₹${Number(d.product.price||0).toLocaleString("en-IN")}</b></div><p class="muted">Deliver to: ${esc(d.areaVillage)}, ${esc(d.city)} - ${esc(d.pincode)}</p>`;
 async function confirmOrder(){
  const r=document.querySelector('input[name="pay"]:checked');if(!r){document.getElementById("err").textContent="Select a payment method.";return}
+ const phone=String(d.phone||"").replace(/\D/g,"").slice(-10);if(!/^[6-9][0-9]{9}$/.test(phone)){document.getElementById("err").textContent="Invalid mobile number.";return}
  const address=`Door/House No: ${d.doorNo}, Area/Village: ${d.areaVillage}, City/Town: ${d.city}, Pincode: ${d.pincode}`;
- const order={productId:d.product._id||null,productName:d.product.name,price:Number(d.product.price||0),quantity:1,customerName:d.name,phone:d.phone,address,doorNo:d.doorNo,areaVillage:d.areaVillage,city:d.city,pincode:d.pincode,paymentMethod:r.value,paymentStatus:"Pending",orderStatus:"Placed"};
- try{const res=await fetch(api+"/orders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(order)});const out=await res.json();if(!res.ok||!out.acknowledged)throw Error(out.message||"Order failed");sessionStorage.setItem("lastOrderId",String(out.insertedId));sessionStorage.removeItem("checkoutData");sessionStorage.removeItem("selectedProduct");location.href="order-success.html"}catch(e){document.getElementById("err").textContent="❌ "+e.message}}
-function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")}
+ const order={productId:d.product._id||null,productName:d.product.name,price:Number(d.product.price||0),quantity:1,customerName:d.name,phone,address,doorNo:d.doorNo,areaVillage:d.areaVillage,city:d.city,pincode:d.pincode,paymentMethod:r.value,paymentStatus:"Pending",orderStatus:"Placed"};
+ try{const res=await fetch(api+"/orders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(order)});const out=await res.json();if(!res.ok||!out.acknowledged)throw Error(out.message||"Order failed");sessionStorage.setItem("lastOrderId",String(out.insertedId));sessionStorage.removeItem("checkoutData");sessionStorage.removeItem("selectedProduct");location.href="order-success.html"}catch(e){document.getElementById("err").textContent="❌ "+e.message}
+}
+function esc(v){return String(v||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")}
 </script></body></html>
