@@ -19,16 +19,19 @@ a{text-decoration:none;color:inherit}.top{background:linear-gradient(100deg,#061
 <div class="field"><label>City / Town</label><input id="city" placeholder="City"></div>
 <div class="field"><label>Pincode</label><input id="pincode" maxlength="6" placeholder="524001"></div>
 <div class="field"><label>Customer Name</label><input id="name" placeholder="Full name"></div>
+<div class="field"><label>Email Address</label><input id="email" type="email" placeholder="you@example.com"></div>
 <div class="field"><label>Mobile Number</label><input id="phone" maxlength="10" placeholder="10-digit mobile"></div>
 </div>
 <div class="row"><a class="btn" href="index.html">Back</a><button class="btn" style="background:#0b57d0;color:white" onclick="next()">Continue to Payment →</button></div><p id="err" class="danger"></p></section></main><div class="footer">Secure shopping • Fast delivery • Easy order tracking</div><script>
-const p=JSON.parse(sessionStorage.getItem("selectedProduct")||"null");const api="https://mahalakshmi-backend-wy3h.onrender.com";
+const p=JSON.parse(sessionStorage.getItem("selectedProduct")||"null");
 if(!p){location.href="index.html"}else document.getElementById("product").innerHTML=`<div class="summary"><b>${esc(p.name)}</b><b>₹${Number(p.price||0).toLocaleString("en-IN")}</b></div>`;
+const verifiedEmail=sessionStorage.getItem("customerOrderEmail")||"";
+if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(verifiedEmail)){const emailInput=document.getElementById("email");emailInput.value=verifiedEmail;emailInput.readOnly=true;emailInput.title="Verified email address";}
 function next(){
- const v={product:p,doorNo:g("doorNo"),areaVillage:g("areaVillage"),city:g("city"),pincode:g("pincode"),name:g("name"),phone:g("phone")};
- if(Object.values(v).slice(1).some(x=>!x)){return err("Please complete all fields.")}
- if(!/^[0-9]{6}$/.test(v.pincode)||!/^[0-9]{10}$/.test(v.phone)){return err("Enter a valid 6-digit pincode and 10-digit mobile number.")}
+ const v={product:p,doorNo:g("doorNo"),areaVillage:g("areaVillage"),city:g("city"),pincode:g("pincode"),name:g("name"),email:g("email").toLowerCase(),phone:String(g("phone")).replace(/\D/g,"").slice(-10)};
+ if(Object.values(v).slice(1).some(x=>!x))return err("Please complete all fields.");
+ if(!/^[0-9]{6}$/.test(v.pincode)||!/^[6-9][0-9]{9}$/.test(v.phone)||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email))return err("Enter a valid email, 6-digit pincode and Indian mobile number.");
  sessionStorage.setItem("checkoutData",JSON.stringify(v));location.href="payment.html";
 }
-function g(id){return document.getElementById(id).value.trim()}function err(x){document.getElementById("err").textContent=x}function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")}
+function g(id){return document.getElementById(id).value.trim()}function err(x){document.getElementById("err").textContent=x}function esc(v){return String(v||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")}
 </script></body></html>
