@@ -1,14 +1,527 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Track Order</title><style>
-:root{--bg:#f4f7fb;--ink:#111827;--muted:#64748b;--brand:#0b57d0;--accent:#ffb300;--ok:#16a34a;--card:#fff;--shadow:0 18px 50px rgba(15,23,42,.12)}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;color:var(--ink);background:radial-gradient(circle at 10% 0,#dbeafe 0,transparent 32%),radial-gradient(circle at 90% 10%,#ede9fe 0,transparent 30%),var(--bg);min-height:100vh}
-a{text-decoration:none;color:inherit}.top{background:linear-gradient(100deg,#061a44,#0b57d0);color:white;padding:15px 5%;display:flex;align-items:center;gap:22px;position:sticky;top:0;z-index:20;box-shadow:0 10px 30px #082e6b33}.logo{font-size:21px;font-weight:900;letter-spacing:.3px}.nav{margin-left:auto;display:flex;gap:18px}.nav a{padding:9px 12px;border-radius:9px}.nav a:hover{background:#ffffff1c}
-.wrap{width:min(1150px,92%);margin:30px auto}.hero{min-height:330px;border-radius:26px;background:linear-gradient(135deg,#081a3c,#145be2 55%,#7c3aed);color:white;position:relative;overflow:hidden;display:flex;align-items:center;padding:45px;box-shadow:0 25px 60px #0b3a8d44;transform-style:preserve-3d}.hero:before,.hero:after{content:"";position:absolute;border-radius:50%;filter:blur(1px);opacity:.45}.hero:before{width:260px;height:260px;background:#60a5fa;right:-80px;top:-90px;box-shadow:0 0 80px #60a5fa}.hero:after{width:180px;height:180px;background:#fbbf24;left:40%;bottom:-110px}.hero-content{position:relative;z-index:2;max-width:620px;transform:translateZ(45px)}.hero h1{font-size:clamp(32px,6vw,60px);margin:0 0 12px}.hero p{font-size:18px;opacity:.9}.btn{display:inline-block;border:0;border-radius:12px;padding:13px 20px;font-weight:800;cursor:pointer;background:white;color:#0b57d0;box-shadow:0 8px 0 #071b43,0 18px 30px #0003;transition:.2s;transform:translateZ(20px)}.btn:hover{transform:translateZ(35px) translateY(-3px)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}.card,.panel{background:rgba(255,255,255,.92);border:1px solid #ffffffaa;border-radius:20px;padding:18px;box-shadow:var(--shadow);transform-style:preserve-3d;transition:transform .18s,box-shadow .25s}.card:hover{box-shadow:0 30px 60px #0f172a24}.card img{width:100%;height:220px;object-fit:cover;border-radius:15px;transform:translateZ(20px);transition:.3s}.card:hover img{transform:translateZ(35px) scale(1.03)}.card h3,.card .price{transform:translateZ(18px)}.price{font-size:22px;font-weight:900}.buy{width:100%;background:#0b57d0;color:white;border:0;border-radius:11px;padding:12px;font-weight:800;cursor:pointer;box-shadow:0 6px 0 #06327e;transition:.2s;transform:translateZ(25px)}.buy:active{transform:translateZ(10px) translateY(4px);box-shadow:0 2px 0 #06327e}
-.panel{max-width:850px;margin:auto}.steps{display:flex;justify-content:space-between;gap:8px;margin:0 auto 25px;max-width:900px}.step{flex:1;text-align:center;padding:12px;border-radius:12px;background:#e2e8f0;color:#64748b;font-weight:800}.step.active{background:#0b57d0;color:white;box-shadow:0 8px 20px #0b57d044}.step.done{background:#dcfce7;color:#15803d}
-.field{margin:14px 0}.field label{display:block;font-weight:800;margin-bottom:7px}.field input,.field textarea,.field select{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:11px;background:white;font-size:15px}.field input:focus,.field textarea:focus{outline:2px solid #93c5fd;box-shadow:0 10px 25px #0b57d01a}.address-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}.pay-option{display:flex;align-items:center;gap:10px;border:1px solid #cbd5e1;border-radius:13px;padding:15px;margin:10px 0;background:#fff;cursor:pointer}.pay-option:has(input:checked){border:2px solid #0b57d0;background:#eff6ff;box-shadow:0 10px 25px #0b57d01c}.summary{display:grid;grid-template-columns:1fr auto;gap:10px;padding:18px;border-radius:15px;background:#f8fafc;margin:18px 0}.success{text-align:center;padding:50px}.success-icon{font-size:72px;animation:pop .7s ease}.timeline{display:grid;gap:0}.track{display:grid;grid-template-columns:42px 1fr;gap:15px;min-height:85px}.dot{width:20px;height:20px;border-radius:50%;background:#cbd5e1;margin-top:3px;box-shadow:0 0 0 7px #e2e8f0}.track.done .dot{background:#16a34a;box-shadow:0 0 0 7px #dcfce7}.line{width:3px;background:#cbd5e1;height:65px;margin:7px 0 0 8px}.track.done .line{background:#86efac}.order-card{display:grid;grid-template-columns:1fr auto;gap:15px;margin:15px 0;padding:18px;border-radius:16px;background:white;box-shadow:0 12px 35px #0f172a12}.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#dcfce7;color:#15803d;font-size:12px;font-weight:900}.muted{color:var(--muted)}.row{display:flex;gap:12px;justify-content:flex-end;margin-top:20px}.danger{color:#b91c1c}.footer{text-align:center;color:#64748b;padding:35px}
-@keyframes pop{0%{transform:scale(.4) rotateY(90deg);opacity:0}70%{transform:scale(1.15) rotateY(-8deg)}100%{transform:scale(1);opacity:1}}
-@media(max-width:650px){.top{flex-wrap:wrap}.nav{margin-left:0;width:100%;justify-content:space-between}.hero{padding:28px;min-height:380px}.address-grid{grid-template-columns:1fr}.full{grid-column:auto}.steps{overflow:auto}.step{min-width:120px}.order-card{grid-template-columns:1fr}.row{justify-content:stretch}.row .btn{flex:1}}
-</style></head><body>
-<header class="top"><a class="logo" href="index.html">MAHALAKSHIMI ✦ STORE</a><nav class="nav"><a href="index.html">Shop</a><a href="orders.html">My Orders</a></nav></header>
-<main class="wrap"><section class="panel"><h2>🚚 Track Order</h2><div id="info"></div><div class="timeline"><div class="track done"><div><div class="dot"></div><div class="line"></div></div><div><b>Order Placed</b><p class="muted">Your order has been received.</p></div></div><div class="track done"><div><div class="dot"></div><div class="line"></div></div><div><b>Order Confirmed</b><p class="muted">The store is preparing your order.</p></div></div><div class="track"><div><div class="dot"></div><div class="line"></div></div><div><b>Shipped</b><p class="muted">Your package will be handed to the delivery partner.</p></div></div><div class="track"><div><div class="dot"></div></div><div><b>Delivered</b><p class="muted">Delivery to your address.</p></div></div></div></section></main><div class="footer">Secure shopping • Fast delivery • Easy order tracking</div><script>
-const api="https://mahalakshmi-backend-wy3h.onrender.com";const id=new URLSearchParams(location.search).get("id");async function load(){if(!id){document.getElementById("info").textContent="No order ID.";return}try{const r=await fetch(api+"/orders/"+encodeURIComponent(id));const o=await r.json();if(!r.ok)throw Error(o.message);document.getElementById("info").innerHTML=`<div class="summary"><span>${esc(o.productName||"Product")}</span><b>₹${Number(o.price||0).toLocaleString("en-IN")}</b></div><p><b>Customer:</b> ${esc(o.customerName||"")}</p><p><b>Payment:</b> ${esc(o.paymentMethod||"")}</p><p><b>Address:</b> ${esc(o.address||"")}</p>`}catch(e){document.getElementById("info").innerHTML="<p class='danger'>Order not found.</p>"}}function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")}load();</script></body></html>
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Track Order</title>
+    <style>
+         :root {
+            --bg: #f4f7fb;
+            --ink: #111827;
+            --muted: #64748b;
+            --brand: #0b57d0;
+            --accent: #ffb300;
+            --ok: #16a34a;
+            --card: #fff;
+            --shadow: 0 18px 50px rgba(15, 23, 42, .12)
+        }
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        body {
+            margin: 0;
+            font-family: Inter, Arial, sans-serif;
+            color: var(--ink);
+            background: radial-gradient(circle at 10% 0, #dbeafe 0, transparent 32%), radial-gradient(circle at 90% 10%, #ede9fe 0, transparent 30%), var(--bg);
+            min-height: 100vh
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit
+        }
+        
+        .top {
+            background: linear-gradient(100deg, #061a44, #0b57d0);
+            color: white;
+            padding: 15px 5%;
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            box-shadow: 0 10px 30px #082e6b33
+        }
+        
+        .logo {
+            font-size: 21px;
+            font-weight: 900;
+            letter-spacing: .3px
+        }
+        
+        .nav {
+            margin-left: auto;
+            display: flex;
+            gap: 18px
+        }
+        
+        .nav a {
+            padding: 9px 12px;
+            border-radius: 9px
+        }
+        
+        .nav a:hover {
+            background: #ffffff1c
+        }
+        
+        .wrap {
+            width: min(1150px, 92%);
+            margin: 30px auto
+        }
+        
+        .hero {
+            min-height: 330px;
+            border-radius: 26px;
+            background: linear-gradient(135deg, #081a3c, #145be2 55%, #7c3aed);
+            color: white;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 45px;
+            box-shadow: 0 25px 60px #0b3a8d44;
+            transform-style: preserve-3d
+        }
+        
+        .hero:before,
+        .hero:after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(1px);
+            opacity: .45
+        }
+        
+        .hero:before {
+            width: 260px;
+            height: 260px;
+            background: #60a5fa;
+            right: -80px;
+            top: -90px;
+            box-shadow: 0 0 80px #60a5fa
+        }
+        
+        .hero:after {
+            width: 180px;
+            height: 180px;
+            background: #fbbf24;
+            left: 40%;
+            bottom: -110px
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 620px;
+            transform: translateZ(45px)
+        }
+        
+        .hero h1 {
+            font-size: clamp(32px, 6vw, 60px);
+            margin: 0 0 12px
+        }
+        
+        .hero p {
+            font-size: 18px;
+            opacity: .9
+        }
+        
+        .btn {
+            display: inline-block;
+            border: 0;
+            border-radius: 12px;
+            padding: 13px 20px;
+            font-weight: 800;
+            cursor: pointer;
+            background: white;
+            color: #0b57d0;
+            box-shadow: 0 8px 0 #071b43, 0 18px 30px #0003;
+            transition: .2s;
+            transform: translateZ(20px)
+        }
+        
+        .btn:hover {
+            transform: translateZ(35px) translateY(-3px)
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px
+        }
+        
+        .card,
+        .panel {
+            background: rgba(255, 255, 255, .92);
+            border: 1px solid #ffffffaa;
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: var(--shadow);
+            transform-style: preserve-3d;
+            transition: transform .18s, box-shadow .25s
+        }
+        
+        .card:hover {
+            box-shadow: 0 30px 60px #0f172a24
+        }
+        
+        .card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 15px;
+            transform: translateZ(20px);
+            transition: .3s
+        }
+        
+        .card:hover img {
+            transform: translateZ(35px) scale(1.03)
+        }
+        
+        .card h3,
+        .card .price {
+            transform: translateZ(18px)
+        }
+        
+        .price {
+            font-size: 22px;
+            font-weight: 900
+        }
+        
+        .buy {
+            width: 100%;
+            background: #0b57d0;
+            color: white;
+            border: 0;
+            border-radius: 11px;
+            padding: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #06327e;
+            transition: .2s;
+            transform: translateZ(25px)
+        }
+        
+        .buy:active {
+            transform: translateZ(10px) translateY(4px);
+            box-shadow: 0 2px 0 #06327e
+        }
+        
+        .panel {
+            max-width: 850px;
+            margin: auto
+        }
+        
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 0 auto 25px;
+            max-width: 900px
+        }
+        
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border-radius: 12px;
+            background: #e2e8f0;
+            color: #64748b;
+            font-weight: 800
+        }
+        
+        .step.active {
+            background: #0b57d0;
+            color: white;
+            box-shadow: 0 8px 20px #0b57d044
+        }
+        
+        .step.done {
+            background: #dcfce7;
+            color: #15803d
+        }
+        
+        .field {
+            margin: 14px 0
+        }
+        
+        .field label {
+            display: block;
+            font-weight: 800;
+            margin-bottom: 7px
+        }
+        
+        .field input,
+        .field textarea,
+        .field select {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 11px;
+            background: white;
+            font-size: 15px
+        }
+        
+        .field input:focus,
+        .field textarea:focus {
+            outline: 2px solid #93c5fd;
+            box-shadow: 0 10px 25px #0b57d01a
+        }
+        
+        .address-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px
+        }
+        
+        .full {
+            grid-column: 1/-1
+        }
+        
+        .pay-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 13px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #fff;
+            cursor: pointer
+        }
+        
+        .pay-option:has(input:checked) {
+            border: 2px solid #0b57d0;
+            background: #eff6ff;
+            box-shadow: 0 10px 25px #0b57d01c
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            padding: 18px;
+            border-radius: 15px;
+            background: #f8fafc;
+            margin: 18px 0
+        }
+        
+        .success {
+            text-align: center;
+            padding: 50px
+        }
+        
+        .success-icon {
+            font-size: 72px;
+            animation: pop .7s ease
+        }
+        
+        .timeline {
+            display: grid;
+            gap: 0
+        }
+        
+        .track {
+            display: grid;
+            grid-template-columns: 42px 1fr;
+            gap: 15px;
+            min-height: 85px
+        }
+        
+        .dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            margin-top: 3px;
+            box-shadow: 0 0 0 7px #e2e8f0
+        }
+        
+        .track.done .dot {
+            background: #16a34a;
+            box-shadow: 0 0 0 7px #dcfce7
+        }
+        
+        .line {
+            width: 3px;
+            background: #cbd5e1;
+            height: 65px;
+            margin: 7px 0 0 8px
+        }
+        
+        .track.done .line {
+            background: #86efac
+        }
+        
+        .order-card {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 15px;
+            margin: 15px 0;
+            padding: 18px;
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 12px 35px #0f172a12
+        }
+        
+        .pill {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #dcfce7;
+            color: #15803d;
+            font-size: 12px;
+            font-weight: 900
+        }
+        
+        .muted {
+            color: var(--muted)
+        }
+        
+        .row {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px
+        }
+        
+        .danger {
+            color: #b91c1c
+        }
+        
+        .footer {
+            text-align: center;
+            color: #64748b;
+            padding: 35px
+        }
+        
+        @keyframes pop {
+            0% {
+                transform: scale(.4) rotateY(90deg);
+                opacity: 0
+            }
+            70% {
+                transform: scale(1.15) rotateY(-8deg)
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1
+            }
+        }
+        
+        @media(max-width:650px) {
+            .top {
+                flex-wrap: wrap
+            }
+            .nav {
+                margin-left: 0;
+                width: 100%;
+                justify-content: space-between
+            }
+            .hero {
+                padding: 28px;
+                min-height: 380px
+            }
+            .address-grid {
+                grid-template-columns: 1fr
+            }
+            .full {
+                grid-column: auto
+            }
+            .steps {
+                overflow: auto
+            }
+            .step {
+                min-width: 120px
+            }
+            .order-card {
+                grid-template-columns: 1fr
+            }
+            .row {
+                justify-content: stretch
+            }
+            .row .btn {
+                flex: 1
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="top"><a class="logo" href="index.html">MAHALAKSHIMI ✦ STORE</a>
+        <nav class="nav"><a href="index.html">Shop</a><a href="orders.html">My Orders</a></nav>
+    </header>
+    <main class="wrap">
+        <section class="panel">
+            <h2>🚚 Track Order</h2>
+            <div id="info"></div>
+            <div class="timeline">
+                <div class="track done">
+                    <div>
+                        <div class="dot"></div>
+                        <div class="line"></div>
+                    </div>
+                    <div><b>Order Placed</b>
+                        <p class="muted">Your order has been received.</p>
+                    </div>
+                </div>
+                <div class="track done">
+                    <div>
+                        <div class="dot"></div>
+                        <div class="line"></div>
+                    </div>
+                    <div><b>Order Confirmed</b>
+                        <p class="muted">The store is preparing your order.</p>
+                    </div>
+                </div>
+                <div class="track">
+                    <div>
+                        <div class="dot"></div>
+                        <div class="line"></div>
+                    </div>
+                    <div><b>Shipped</b>
+                        <p class="muted">Your package will be handed to the delivery partner.</p>
+                    </div>
+                </div>
+                <div class="track">
+                    <div>
+                        <div class="dot"></div>
+                    </div>
+                    <div><b>Delivered</b>
+                        <p class="muted">Delivery to your address.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <div class="footer">Secure shopping • Fast delivery • Easy order tracking</div>
+    <script>
+        const api = "https://mahalakshmi-backend-api.onrender.com";
+        const id = new URLSearchParams(location.search).get("id");
+        async function load() {
+            if (!id) {
+                document.getElementById("info").textContent = "No order ID.";
+                return
+            }
+            try {
+                const r = await fetch(api + "/orders/" + encodeURIComponent(id));
+                const o = await r.json();
+                if (!r.ok) throw Error(o.message);
+                document.getElementById("info").innerHTML = `<div class="summary"><span>${esc(o.productName||"Product")}</span><b>₹${Number(o.price||0).toLocaleString("en-IN")}</b></div><p><b>Customer:</b> ${esc(o.customerName||"")}</p><p><b>Payment:</b> ${esc(o.paymentMethod||"")}</p><p><b>Address:</b> ${esc(o.address||"")}</p>`
+            } catch (e) {
+                document.getElementById("info").innerHTML = "<p class='danger'>Order not found.</p>"
+            }
+        }
+
+        function esc(v) {
+            return String(v ? ? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+        }
+        load();
+    </script>
+</body>
+
+</html>
