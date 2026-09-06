@@ -1,4 +1,4 @@
-const API_URL = "https://mahalakshmi-backend-wy3h.onrender.com";
+const API_URL = "https://mahalakshmi-backend-api.onrender.com";
 // For local testing, use: http://localhost:5003
 
 let selectedProduct = null;
@@ -97,7 +97,7 @@ function buyNow(product) {
 
 
 function escapeHtml(value) {
-    return String(value ?? "")
+    return String(value ? ? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")

@@ -1,116 +1,304 @@
 <!doctype html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Payment</title>
-<style>
-:root{--bg:#f4f7fb;--ink:#111827;--muted:#64748b;--brand:#0b57d0;--accent:#ffb300;--ok:#16a34a;--card:#fff;--shadow:0 18px 50px rgba(15,23,42,.12)}
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,Arial,sans-serif;color:var(--ink);background:radial-gradient(circle at 10% 0,#dbeafe 0,transparent 32%),radial-gradient(circle at 90% 10%,#ede9fe 0,transparent 30%),var(--bg);min-height:100vh}
-a{text-decoration:none;color:inherit}
-.top{background:linear-gradient(100deg,#061a44,#0b57d0);color:white;padding:15px 5%;display:flex;align-items:center;gap:22px;position:sticky;top:0;z-index:20;box-shadow:0 10px 30px #082e6b33}
-.logo{font-size:21px;font-weight:900;letter-spacing:.3px}
-.nav{margin-left:auto;display:flex;gap:18px}.nav a{padding:9px 12px;border-radius:9px}.nav a:hover{background:#ffffff1c}
-.wrap{width:min(1150px,92%);margin:30px auto}
-.btn{display:inline-block;border:0;border-radius:12px;padding:13px 20px;font-weight:800;cursor:pointer;background:white;color:#0b57d0;box-shadow:0 8px 0 #071b43,0 18px 30px #0003;transition:.2s}
-.btn:hover{transform:translateY(-2px)}
-.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
-.panel{background:rgba(255,255,255,.92);border:1px solid #ffffffaa;border-radius:20px;padding:18px;box-shadow:var(--shadow);max-width:850px;margin:auto}
-.steps{display:flex;justify-content:space-between;gap:8px;margin:0 auto 25px;max-width:900px}
-.step{flex:1;text-align:center;padding:12px;border-radius:12px;background:#e2e8f0;color:#64748b;font-weight:800}
-.step.active{background:#0b57d0;color:white;box-shadow:0 8px 20px #0b57d044}
-.step.done{background:#dcfce7;color:#15803d}
-.pay-option{display:flex;align-items:center;gap:10px;border:1px solid #cbd5e1;border-radius:13px;padding:15px;margin:10px 0;background:#fff;cursor:pointer}
-.pay-option:has(input:checked){border:2px solid #0b57d0;background:#eff6ff;box-shadow:0 10px 25px #0b57d01c}
-.summary{display:grid;grid-template-columns:1fr auto;gap:10px;padding:18px;border-radius:15px;background:#f8fafc;margin:18px 0}
-.muted{color:var(--muted)}
-.row{display:flex;gap:12px;justify-content:flex-end;margin-top:20px}
-.danger{color:#b91c1c;font-weight:800;min-height:24px}
-.ok{color:#15803d;font-weight:800}
-.notice{padding:12px 14px;border-radius:12px;background:#eff6ff;border:1px solid #bfdbfe;margin:14px 0;color:#1e3a8a}
-.footer{text-align:center;color:#64748b;padding:35px}
-@media(max-width:650px){.top{flex-wrap:wrap}.nav{margin-left:0;width:100%;justify-content:space-between}.steps{overflow:auto}.step{min-width:120px}.row{justify-content:stretch;flex-direction:column}.row .btn{width:100%}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Payment</title>
+    <style>
+         :root {
+            --bg: #f4f7fb;
+            --ink: #111827;
+            --muted: #64748b;
+            --brand: #0b57d0;
+            --accent: #ffb300;
+            --ok: #16a34a;
+            --card: #fff;
+            --shadow: 0 18px 50px rgba(15, 23, 42, .12)
+        }
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        body {
+            margin: 0;
+            font-family: Inter, Arial, sans-serif;
+            color: var(--ink);
+            background: radial-gradient(circle at 10% 0, #dbeafe 0, transparent 32%), radial-gradient(circle at 90% 10%, #ede9fe 0, transparent 30%), var(--bg);
+            min-height: 100vh
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit
+        }
+        
+        .top {
+            background: linear-gradient(100deg, #061a44, #0b57d0);
+            color: white;
+            padding: 15px 5%;
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            box-shadow: 0 10px 30px #082e6b33
+        }
+        
+        .logo {
+            font-size: 21px;
+            font-weight: 900;
+            letter-spacing: .3px
+        }
+        
+        .nav {
+            margin-left: auto;
+            display: flex;
+            gap: 18px
+        }
+        
+        .nav a {
+            padding: 9px 12px;
+            border-radius: 9px
+        }
+        
+        .nav a:hover {
+            background: #ffffff1c
+        }
+        
+        .wrap {
+            width: min(1150px, 92%);
+            margin: 30px auto
+        }
+        
+        .btn {
+            display: inline-block;
+            border: 0;
+            border-radius: 12px;
+            padding: 13px 20px;
+            font-weight: 800;
+            cursor: pointer;
+            background: white;
+            color: #0b57d0;
+            box-shadow: 0 8px 0 #071b43, 0 18px 30px #0003;
+            transition: .2s
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px)
+        }
+        
+        .btn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+            transform: none
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, .92);
+            border: 1px solid #ffffffaa;
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: var(--shadow);
+            max-width: 850px;
+            margin: auto
+        }
+        
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 0 auto 25px;
+            max-width: 900px
+        }
+        
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border-radius: 12px;
+            background: #e2e8f0;
+            color: #64748b;
+            font-weight: 800
+        }
+        
+        .step.active {
+            background: #0b57d0;
+            color: white;
+            box-shadow: 0 8px 20px #0b57d044
+        }
+        
+        .step.done {
+            background: #dcfce7;
+            color: #15803d
+        }
+        
+        .pay-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 13px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #fff;
+            cursor: pointer
+        }
+        
+        .pay-option:has(input:checked) {
+            border: 2px solid #0b57d0;
+            background: #eff6ff;
+            box-shadow: 0 10px 25px #0b57d01c
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            padding: 18px;
+            border-radius: 15px;
+            background: #f8fafc;
+            margin: 18px 0
+        }
+        
+        .muted {
+            color: var(--muted)
+        }
+        
+        .row {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px
+        }
+        
+        .danger {
+            color: #b91c1c;
+            font-weight: 800;
+            min-height: 24px
+        }
+        
+        .ok {
+            color: #15803d;
+            font-weight: 800
+        }
+        
+        .notice {
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            margin: 14px 0;
+            color: #1e3a8a
+        }
+        
+        .footer {
+            text-align: center;
+            color: #64748b;
+            padding: 35px
+        }
+        
+        @media(max-width:650px) {
+            .top {
+                flex-wrap: wrap
+            }
+            .nav {
+                margin-left: 0;
+                width: 100%;
+                justify-content: space-between
+            }
+            .steps {
+                overflow: auto
+            }
+            .step {
+                min-width: 120px
+            }
+            .row {
+                justify-content: stretch;
+                flex-direction: column
+            }
+            .row .btn {
+                width: 100%
+            }
+        }
+    </style>
 </head>
+
 <body>
-<header class="top">
-  <a class="logo" href="index.html">MAHALAKSHIMI ✦ STORE</a>
-  <nav class="nav">
-    <a href="index.html">Shop</a>
-    <a href="orders.html">My Orders</a>
-  </nav>
-</header>
+    <header class="top">
+        <a class="logo" href="index.html">MAHALAKSHIMI ✦ STORE</a>
+        <nav class="nav">
+            <a href="index.html">Shop</a>
+            <a href="orders.html">My Orders</a>
+        </nav>
+    </header>
 
-<main class="wrap">
-  <div class="steps">
-    <div class="step done">✓ Address</div>
-    <div class="step active">2. Payment</div>
-    <div class="step">3. Confirm</div>
-  </div>
+    <main class="wrap">
+        <div class="steps">
+            <div class="step done">✓ Address</div>
+            <div class="step active">2. Payment</div>
+            <div class="step">3. Confirm</div>
+        </div>
 
-  <section class="panel">
-    <h2>💳 Choose payment method</h2>
-    <div id="summary"></div>
+        <section class="panel">
+            <h2>💳 Choose payment method</h2>
+            <div id="summary"></div>
 
-    <label class="pay-option">
+            <label class="pay-option">
       <input type="radio" name="pay" value="Cash on Delivery">
       <b>Cash on Delivery</b>
       <span class="muted">Order is placed immediately. Pay on delivery.</span>
     </label>
 
-    <label class="pay-option">
+            <label class="pay-option">
       <input type="radio" name="pay" value="UPI">
       <b>UPI</b>
       <span class="muted">Order is created only after verified successful payment.</span>
     </label>
 
-    <label class="pay-option">
+            <label class="pay-option">
       <input type="radio" name="pay" value="Card">
       <b>Card</b>
       <span class="muted">Order is created only after verified successful payment.</span>
     </label>
 
-    <div class="notice">
-      🔒 For UPI/Card, payment must be completed and verified by the backend.
-      If payment fails or you close the payment window, no customer order is created.
-    </div>
+            <div class="notice">
+                🔒 For UPI/Card, payment must be completed and verified by the backend. If payment fails or you close the payment window, no customer order is created.
+            </div>
 
-    <div class="row">
-      <a class="btn" href="checkout.html">← Back</a>
-      <button
-        id="placeOrderBtn"
-        class="btn"
-        style="background:#0b57d0;color:white"
-        onclick="confirmOrder()">
+            <div class="row">
+                <a class="btn" href="checkout.html">← Back</a>
+                <button id="placeOrderBtn" class="btn" style="background:#0b57d0;color:white" onclick="confirmOrder()">
         Continue →
       </button>
+            </div>
+
+            <p id="err" class="danger"></p>
+            <p id="status" class="ok"></p>
+        </section>
+    </main>
+
+    <div class="footer">
+        Secure shopping • Verified online payments • Easy order tracking
     </div>
 
-    <p id="err" class="danger"></p>
-    <p id="status" class="ok"></p>
-  </section>
-</main>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        const api = "https://mahalakshmi-backend-api.onrender.com";
+        const d = JSON.parse(sessionStorage.getItem("checkoutData") || "null");
 
-<div class="footer">
-  Secure shopping • Verified online payments • Easy order tracking
-</div>
+        if (!d || !d.product) {
+            location.href = "index.html";
+        }
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script>
-const api = "https://mahalakshmi-backend-wy3h.onrender.com";
-const d = JSON.parse(sessionStorage.getItem("checkoutData") || "null");
+        const errBox = document.getElementById("err");
+        const statusBox = document.getElementById("status");
+        const button = document.getElementById("placeOrderBtn");
 
-if (!d || !d.product) {
-  location.href = "index.html";
-}
-
-const errBox = document.getElementById("err");
-const statusBox = document.getElementById("status");
-const button = document.getElementById("placeOrderBtn");
-
-document.getElementById("summary").innerHTML =
-  `<div class="summary">
+        document.getElementById("summary").innerHTML =
+            `<div class="summary">
     <span>${esc(d.product.name)} × 1</span>
     <b>₹${Number(d.product.price || 0).toLocaleString("en-IN")}</b>
   </div>
@@ -118,280 +306,276 @@ document.getElementById("summary").innerHTML =
     Deliver to: ${esc(d.areaVillage)}, ${esc(d.city)} - ${esc(d.pincode)}
   </p>`;
 
-document.querySelectorAll('input[name="pay"]').forEach(input => {
-  input.addEventListener("change", () => {
-    button.textContent =
-      input.value === "Cash on Delivery"
-        ? "Place COD Order →"
-        : "Pay & Place Order →";
-    errBox.textContent = "";
-    statusBox.textContent = "";
-  });
-});
+        document.querySelectorAll('input[name="pay"]').forEach(input => {
+            input.addEventListener("change", () => {
+                button.textContent =
+                    input.value === "Cash on Delivery" ?
+                    "Place COD Order →" :
+                    "Pay & Place Order →";
+                errBox.textContent = "";
+                statusBox.textContent = "";
+            });
+        });
 
-function deliveryPayload(paymentMethod) {
-  const phone = String(d.phone || "")
-    .replace(/\D/g, "")
-    .slice(-10);
+        function deliveryPayload(paymentMethod) {
+            const phone = String(d.phone || "")
+                .replace(/\D/g, "")
+                .slice(-10);
 
-  const email = String(d.email || "")
-    .trim()
-    .toLowerCase();
+            const email = String(d.email || "")
+                .trim()
+                .toLowerCase();
 
-  if (!/^[6-9][0-9]{9}$/.test(phone)) {
-    throw new Error("Invalid mobile number.");
-  }
+            if (!/^[6-9][0-9]{9}$/.test(phone)) {
+                throw new Error("Invalid mobile number.");
+            }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    throw new Error("Invalid email address.");
-  }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                throw new Error("Invalid email address.");
+            }
 
-  if (!d.product._id) {
-    throw new Error("Product ID is missing. Please return to Shop and select the product again.");
-  }
+            if (!d.product._id) {
+                throw new Error("Product ID is missing. Please return to Shop and select the product again.");
+            }
 
-  const address =
-    `Door/House No: ${d.doorNo}, ` +
-    `Area/Village: ${d.areaVillage}, ` +
-    `City/Town: ${d.city}, ` +
-    `Pincode: ${d.pincode}`;
+            const address =
+                `Door/House No: ${d.doorNo}, ` +
+                `Area/Village: ${d.areaVillage}, ` +
+                `City/Town: ${d.city}, ` +
+                `Pincode: ${d.pincode}`;
 
-  return {
-    productId: d.product._id,
-    productName: d.product.name,
-    quantity: 1,
-    customerName: d.name,
-    email,
-    phone,
-    address,
-    doorNo: d.doorNo,
-    areaVillage: d.areaVillage,
-    city: d.city,
-    pincode: d.pincode,
-    paymentMethod
-  };
-}
-
-async function readJson(response) {
-  const type = response.headers.get("content-type") || "";
-
-  if (!type.includes("application/json")) {
-    const text = await response.text();
-    throw new Error(
-      `Server returned ${response.status} instead of JSON. ` +
-      `Make sure the latest backend is deployed.`
-    );
-  }
-
-  return response.json();
-}
-
-function finishOrder(orderId) {
-  sessionStorage.setItem("lastOrderId", String(orderId));
-  sessionStorage.removeItem("checkoutData");
-  sessionStorage.removeItem("selectedProduct");
-  location.href = "order-success.html";
-}
-
-async function placeCodOrder() {
-  const order = deliveryPayload("Cash on Delivery");
-
-  const response = await fetch(api + "/orders", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(order)
-  });
-
-  const data = await readJson(response);
-
-  if (!response.ok || !data.acknowledged) {
-    throw new Error(data.message || "COD order failed.");
-  }
-
-  finishOrder(data.insertedId);
-}
-
-async function startOnlinePayment(selectedMethod) {
-  if (typeof Razorpay === "undefined") {
-    throw new Error(
-      "Payment window could not load. Check your internet connection and try again."
-    );
-  }
-
-  const delivery = deliveryPayload(selectedMethod);
-
-  statusBox.textContent = "Starting secure payment...";
-
-  // Step 1:
-  // Create a Razorpay payment order.
-  // This does NOT create a customer order.
-  const createResponse = await fetch(
-    api + "/payments/razorpay/create-order",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        productId: d.product._id,
-        quantity: 1
-      })
-    }
-  );
-
-  const paymentOrder = await readJson(createResponse);
-
-  if (!createResponse.ok) {
-    throw new Error(
-      paymentOrder.message ||
-      "Unable to start online payment."
-    );
-  }
-
-  const options = {
-    key: paymentOrder.keyId,
-    amount: paymentOrder.amount,
-    currency: paymentOrder.currency,
-    name: "MAHALAKSHIMI CLOTH CENTER AND FANCY STORE",
-    description: String(d.product.name || "Order Payment"),
-    order_id: paymentOrder.razorpayOrderId,
-
-    prefill: {
-      name: String(d.name || ""),
-      contact: "+91" + delivery.phone
-    },
-
-    notes: {
-      selected_payment_option: selectedMethod
-    },
-
-    theme: {
-      color: "#0b57d0"
-    },
-
-    modal: {
-      ondismiss: function () {
-        statusBox.textContent = "";
-        errBox.textContent =
-          "Payment cancelled. Your order was NOT placed.";
-        button.disabled = false;
-      }
-    },
-
-    handler: async function (paymentResponse) {
-      try {
-        statusBox.textContent =
-          "Payment received. Verifying securely before placing your order...";
-
-        // Step 2:
-        // Backend verifies signature + payment status.
-        // ONLY this endpoint can create the paid order.
-        const verifyResponse = await fetch(
-          api + "/payments/razorpay/verify-and-place-order",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              ...delivery,
-              razorpay_payment_id:
-                paymentResponse.razorpay_payment_id,
-              razorpay_order_id:
-                paymentResponse.razorpay_order_id,
-              razorpay_signature:
-                paymentResponse.razorpay_signature
-            })
-          }
-        );
-
-        const verified = await readJson(verifyResponse);
-
-        if (!verifyResponse.ok || !verified.acknowledged) {
-          throw new Error(
-            verified.message ||
-            "Payment verification failed. Order was not placed."
-          );
+            return {
+                productId: d.product._id,
+                productName: d.product.name,
+                quantity: 1,
+                customerName: d.name,
+                email,
+                phone,
+                address,
+                doorNo: d.doorNo,
+                areaVillage: d.areaVillage,
+                city: d.city,
+                pincode: d.pincode,
+                paymentMethod
+            };
         }
 
-        statusBox.textContent =
-          "✅ Payment verified. Order placed successfully.";
+        async function readJson(response) {
+            const type = response.headers.get("content-type") || "";
 
-        finishOrder(verified.insertedId);
-      } catch (error) {
-        statusBox.textContent = "";
-        errBox.textContent =
-          "❌ " + error.message;
-        button.disabled = false;
-      }
-    }
-  };
+            if (!type.includes("application/json")) {
+                const text = await response.text();
+                throw new Error(
+                    `Server returned ${response.status} instead of JSON. ` +
+                    `Make sure the latest backend is deployed.`
+                );
+            }
 
-  const checkout = new Razorpay(options);
+            return response.json();
+        }
 
-  checkout.on("payment.failed", function (response) {
-    statusBox.textContent = "";
-    errBox.textContent =
-      "❌ Payment failed. Your order was NOT placed." +
-      (response &&
-       response.error &&
-       response.error.description
-        ? " " + response.error.description
-        : "");
-    button.disabled = false;
-  });
+        function finishOrder(orderId) {
+            sessionStorage.setItem("lastOrderId", String(orderId));
+            sessionStorage.removeItem("checkoutData");
+            sessionStorage.removeItem("selectedProduct");
+            location.href = "order-success.html";
+        }
 
-  checkout.open();
-}
+        async function placeCodOrder() {
+            const order = deliveryPayload("Cash on Delivery");
 
-async function confirmOrder() {
-  const selected =
-    document.querySelector(
-      'input[name="pay"]:checked'
-    );
+            const response = await fetch(api + "/orders", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(order)
+            });
 
-  errBox.textContent = "";
-  statusBox.textContent = "";
+            const data = await readJson(response);
 
-  if (!selected) {
-    errBox.textContent =
-      "Select a payment method.";
-    return;
-  }
+            if (!response.ok || !data.acknowledged) {
+                throw new Error(data.message || "COD order failed.");
+            }
 
-  button.disabled = true;
+            finishOrder(data.insertedId);
+        }
 
-  try {
-    if (
-      selected.value ===
-      "Cash on Delivery"
-    ) {
-      statusBox.textContent =
-        "Placing COD order...";
+        async function startOnlinePayment(selectedMethod) {
+            if (typeof Razorpay === "undefined") {
+                throw new Error(
+                    "Payment window could not load. Check your internet connection and try again."
+                );
+            }
 
-      await placeCodOrder();
-      return;
-    }
+            const delivery = deliveryPayload(selectedMethod);
 
-    await startOnlinePayment(
-      selected.value
-    );
-  } catch (error) {
-    statusBox.textContent = "";
-    errBox.textContent =
-      "❌ " + error.message;
-    button.disabled = false;
-  }
-}
+            statusBox.textContent = "Starting secure payment...";
 
-function esc(v) {
-  return String(v || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-</script>
+            // Step 1:
+            // Create a Razorpay payment order.
+            // This does NOT create a customer order.
+            const createResponse = await fetch(
+                api + "/payments/razorpay/create-order", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        productId: d.product._id,
+                        quantity: 1
+                    })
+                }
+            );
+
+            const paymentOrder = await readJson(createResponse);
+
+            if (!createResponse.ok) {
+                throw new Error(
+                    paymentOrder.message ||
+                    "Unable to start online payment."
+                );
+            }
+
+            const options = {
+                key: paymentOrder.keyId,
+                amount: paymentOrder.amount,
+                currency: paymentOrder.currency,
+                name: "MAHALAKSHIMI CLOTH CENTER AND FANCY STORE",
+                description: String(d.product.name || "Order Payment"),
+                order_id: paymentOrder.razorpayOrderId,
+
+                prefill: {
+                    name: String(d.name || ""),
+                    contact: "+91" + delivery.phone
+                },
+
+                notes: {
+                    selected_payment_option: selectedMethod
+                },
+
+                theme: {
+                    color: "#0b57d0"
+                },
+
+                modal: {
+                    ondismiss: function() {
+                        statusBox.textContent = "";
+                        errBox.textContent =
+                            "Payment cancelled. Your order was NOT placed.";
+                        button.disabled = false;
+                    }
+                },
+
+                handler: async function(paymentResponse) {
+                    try {
+                        statusBox.textContent =
+                            "Payment received. Verifying securely before placing your order...";
+
+                        // Step 2:
+                        // Backend verifies signature + payment status.
+                        // ONLY this endpoint can create the paid order.
+                        const verifyResponse = await fetch(
+                            api + "/payments/razorpay/verify-and-place-order", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    ...delivery,
+                                    razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                                    razorpay_order_id: paymentResponse.razorpay_order_id,
+                                    razorpay_signature: paymentResponse.razorpay_signature
+                                })
+                            }
+                        );
+
+                        const verified = await readJson(verifyResponse);
+
+                        if (!verifyResponse.ok || !verified.acknowledged) {
+                            throw new Error(
+                                verified.message ||
+                                "Payment verification failed. Order was not placed."
+                            );
+                        }
+
+                        statusBox.textContent =
+                            "✅ Payment verified. Order placed successfully.";
+
+                        finishOrder(verified.insertedId);
+                    } catch (error) {
+                        statusBox.textContent = "";
+                        errBox.textContent =
+                            "❌ " + error.message;
+                        button.disabled = false;
+                    }
+                }
+            };
+
+            const checkout = new Razorpay(options);
+
+            checkout.on("payment.failed", function(response) {
+                statusBox.textContent = "";
+                errBox.textContent =
+                    "❌ Payment failed. Your order was NOT placed." +
+                    (response &&
+                        response.error &&
+                        response.error.description ?
+                        " " + response.error.description :
+                        "");
+                button.disabled = false;
+            });
+
+            checkout.open();
+        }
+
+        async function confirmOrder() {
+            const selected =
+                document.querySelector(
+                    'input[name="pay"]:checked'
+                );
+
+            errBox.textContent = "";
+            statusBox.textContent = "";
+
+            if (!selected) {
+                errBox.textContent =
+                    "Select a payment method.";
+                return;
+            }
+
+            button.disabled = true;
+
+            try {
+                if (
+                    selected.value ===
+                    "Cash on Delivery"
+                ) {
+                    statusBox.textContent =
+                        "Placing COD order...";
+
+                    await placeCodOrder();
+                    return;
+                }
+
+                await startOnlinePayment(
+                    selected.value
+                );
+            } catch (error) {
+                statusBox.textContent = "";
+                errBox.textContent =
+                    "❌ " + error.message;
+                button.disabled = false;
+            }
+        }
+
+        function esc(v) {
+            return String(v || "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;");
+        }
+    </script>
 </body>
+
 </html>

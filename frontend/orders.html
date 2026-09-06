@@ -1,52 +1,739 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>My Orders</title><style>
-:root{--bg:#f4f7fb;--ink:#111827;--muted:#64748b;--brand:#0b57d0;--accent:#ffb300;--ok:#16a34a;--card:#fff;--shadow:0 18px 50px rgba(15,23,42,.12)}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;color:var(--ink);background:radial-gradient(circle at 10% 0,#dbeafe 0,transparent 32%),radial-gradient(circle at 90% 10%,#ede9fe 0,transparent 30%),var(--bg);min-height:100vh}
-a{text-decoration:none;color:inherit}.top{background:linear-gradient(100deg,#061a44,#0b57d0);color:white;padding:15px 5%;display:flex;align-items:center;gap:22px;position:sticky;top:0;z-index:20;box-shadow:0 10px 30px #082e6b33}.logo{font-size:21px;font-weight:900;letter-spacing:.3px}.nav{margin-left:auto;display:flex;gap:18px}.nav a{padding:9px 12px;border-radius:9px}.nav a:hover{background:#ffffff1c}
-.wrap{width:min(1150px,92%);margin:30px auto}.hero{min-height:330px;border-radius:26px;background:linear-gradient(135deg,#081a3c,#145be2 55%,#7c3aed);color:white;position:relative;overflow:hidden;display:flex;align-items:center;padding:45px;box-shadow:0 25px 60px #0b3a8d44;transform-style:preserve-3d}.hero:before,.hero:after{content:"";position:absolute;border-radius:50%;filter:blur(1px);opacity:.45}.hero:before{width:260px;height:260px;background:#60a5fa;right:-80px;top:-90px;box-shadow:0 0 80px #60a5fa}.hero:after{width:180px;height:180px;background:#fbbf24;left:40%;bottom:-110px}.hero-content{position:relative;z-index:2;max-width:620px;transform:translateZ(45px)}.hero h1{font-size:clamp(32px,6vw,60px);margin:0 0 12px}.hero p{font-size:18px;opacity:.9}.btn{display:inline-block;border:0;border-radius:12px;padding:13px 20px;font-weight:800;cursor:pointer;background:white;color:#0b57d0;box-shadow:0 8px 0 #071b43,0 18px 30px #0003;transition:.2s;transform:translateZ(20px)}.btn:hover{transform:translateZ(35px) translateY(-3px)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:20px}.card,.panel{background:rgba(255,255,255,.92);border:1px solid #ffffffaa;border-radius:20px;padding:18px;box-shadow:var(--shadow);transform-style:preserve-3d;transition:transform .18s,box-shadow .25s}.card:hover{box-shadow:0 30px 60px #0f172a24}.card img{width:100%;height:220px;object-fit:cover;border-radius:15px;transform:translateZ(20px);transition:.3s}.card:hover img{transform:translateZ(35px) scale(1.03)}.card h3,.card .price{transform:translateZ(18px)}.price{font-size:22px;font-weight:900}.buy{width:100%;background:#0b57d0;color:white;border:0;border-radius:11px;padding:12px;font-weight:800;cursor:pointer;box-shadow:0 6px 0 #06327e;transition:.2s;transform:translateZ(25px)}.buy:active{transform:translateZ(10px) translateY(4px);box-shadow:0 2px 0 #06327e}
-.panel{max-width:850px;margin:auto}.steps{display:flex;justify-content:space-between;gap:8px;margin:0 auto 25px;max-width:900px}.step{flex:1;text-align:center;padding:12px;border-radius:12px;background:#e2e8f0;color:#64748b;font-weight:800}.step.active{background:#0b57d0;color:white;box-shadow:0 8px 20px #0b57d044}.step.done{background:#dcfce7;color:#15803d}
-.field{margin:14px 0}.field label{display:block;font-weight:800;margin-bottom:7px}.field input,.field textarea,.field select{width:100%;padding:13px;border:1px solid #cbd5e1;border-radius:11px;background:white;font-size:15px}.field input:focus,.field textarea:focus{outline:2px solid #93c5fd;box-shadow:0 10px 25px #0b57d01a}.address-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.full{grid-column:1/-1}.pay-option{display:flex;align-items:center;gap:10px;border:1px solid #cbd5e1;border-radius:13px;padding:15px;margin:10px 0;background:#fff;cursor:pointer}.pay-option:has(input:checked){border:2px solid #0b57d0;background:#eff6ff;box-shadow:0 10px 25px #0b57d01c}.summary{display:grid;grid-template-columns:1fr auto;gap:10px;padding:18px;border-radius:15px;background:#f8fafc;margin:18px 0}.success{text-align:center;padding:50px}.success-icon{font-size:72px;animation:pop .7s ease}.timeline{display:grid;gap:0}.track{display:grid;grid-template-columns:42px 1fr;gap:15px;min-height:85px}.dot{width:20px;height:20px;border-radius:50%;background:#cbd5e1;margin-top:3px;box-shadow:0 0 0 7px #e2e8f0}.track.done .dot{background:#16a34a;box-shadow:0 0 0 7px #dcfce7}.line{width:3px;background:#cbd5e1;height:65px;margin:7px 0 0 8px}.track.done .line{background:#86efac}.order-card{display:grid;grid-template-columns:1fr auto;gap:15px;margin:15px 0;padding:18px;border-radius:16px;background:white;box-shadow:0 12px 35px #0f172a12}.pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#dcfce7;color:#15803d;font-size:12px;font-weight:900}.muted{color:var(--muted)}.row{display:flex;gap:12px;justify-content:flex-end;margin-top:20px}.danger{color:#b91c1c}.footer{text-align:center;color:#64748b;padding:35px}
-@keyframes pop{0%{transform:scale(.4) rotateY(90deg);opacity:0}70%{transform:scale(1.15) rotateY(-8deg)}100%{transform:scale(1);opacity:1}}
-@media(max-width:650px){.top{flex-wrap:wrap}.nav{margin-left:0;width:100%;justify-content:space-between}.hero{padding:28px;min-height:380px}.address-grid{grid-template-columns:1fr}.full{grid-column:auto}.steps{overflow:auto}.step{min-width:120px}.order-card{grid-template-columns:1fr}.row{justify-content:stretch}.row .btn{flex:1}}
+<!doctype html>
+<html lang="en">
 
-.auth-box{max-width:560px;margin:28px auto}.auth-actions{display:flex;gap:10px;flex-wrap:wrap}.auth-actions .btn{flex:1}.hidden{display:none!important}.otp-note{padding:12px;border-radius:12px;background:#eff6ff;color:#1e3a8a;margin:12px 0}.logout{background:#fee2e2!important;color:#991b1b!important;box-shadow:none!important}.message{font-weight:800;min-height:22px;margin-top:12px}.ok{color:#15803d}.danger-text{color:#b91c1c}.phone-chip{display:inline-block;padding:7px 10px;border-radius:999px;background:#e0e7ff;color:#3730a3;font-weight:800;margin-bottom:15px}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>My Orders</title>
+    <style>
+         :root {
+            --bg: #f4f7fb;
+            --ink: #111827;
+            --muted: #64748b;
+            --brand: #0b57d0;
+            --accent: #ffb300;
+            --ok: #16a34a;
+            --card: #fff;
+            --shadow: 0 18px 50px rgba(15, 23, 42, .12)
+        }
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        body {
+            margin: 0;
+            font-family: Inter, Arial, sans-serif;
+            color: var(--ink);
+            background: radial-gradient(circle at 10% 0, #dbeafe 0, transparent 32%), radial-gradient(circle at 90% 10%, #ede9fe 0, transparent 30%), var(--bg);
+            min-height: 100vh
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit
+        }
+        
+        .top {
+            background: linear-gradient(100deg, #061a44, #0b57d0);
+            color: white;
+            padding: 15px 5%;
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            box-shadow: 0 10px 30px #082e6b33
+        }
+        
+        .logo {
+            font-size: 21px;
+            font-weight: 900;
+            letter-spacing: .3px
+        }
+        
+        .nav {
+            margin-left: auto;
+            display: flex;
+            gap: 18px
+        }
+        
+        .nav a {
+            padding: 9px 12px;
+            border-radius: 9px
+        }
+        
+        .nav a:hover {
+            background: #ffffff1c
+        }
+        
+        .wrap {
+            width: min(1150px, 92%);
+            margin: 30px auto
+        }
+        
+        .hero {
+            min-height: 330px;
+            border-radius: 26px;
+            background: linear-gradient(135deg, #081a3c, #145be2 55%, #7c3aed);
+            color: white;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 45px;
+            box-shadow: 0 25px 60px #0b3a8d44;
+            transform-style: preserve-3d
+        }
+        
+        .hero:before,
+        .hero:after {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(1px);
+            opacity: .45
+        }
+        
+        .hero:before {
+            width: 260px;
+            height: 260px;
+            background: #60a5fa;
+            right: -80px;
+            top: -90px;
+            box-shadow: 0 0 80px #60a5fa
+        }
+        
+        .hero:after {
+            width: 180px;
+            height: 180px;
+            background: #fbbf24;
+            left: 40%;
+            bottom: -110px
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 620px;
+            transform: translateZ(45px)
+        }
+        
+        .hero h1 {
+            font-size: clamp(32px, 6vw, 60px);
+            margin: 0 0 12px
+        }
+        
+        .hero p {
+            font-size: 18px;
+            opacity: .9
+        }
+        
+        .btn {
+            display: inline-block;
+            border: 0;
+            border-radius: 12px;
+            padding: 13px 20px;
+            font-weight: 800;
+            cursor: pointer;
+            background: white;
+            color: #0b57d0;
+            box-shadow: 0 8px 0 #071b43, 0 18px 30px #0003;
+            transition: .2s;
+            transform: translateZ(20px)
+        }
+        
+        .btn:hover {
+            transform: translateZ(35px) translateY(-3px)
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px
+        }
+        
+        .card,
+        .panel {
+            background: rgba(255, 255, 255, .92);
+            border: 1px solid #ffffffaa;
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: var(--shadow);
+            transform-style: preserve-3d;
+            transition: transform .18s, box-shadow .25s
+        }
+        
+        .card:hover {
+            box-shadow: 0 30px 60px #0f172a24
+        }
+        
+        .card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 15px;
+            transform: translateZ(20px);
+            transition: .3s
+        }
+        
+        .card:hover img {
+            transform: translateZ(35px) scale(1.03)
+        }
+        
+        .card h3,
+        .card .price {
+            transform: translateZ(18px)
+        }
+        
+        .price {
+            font-size: 22px;
+            font-weight: 900
+        }
+        
+        .buy {
+            width: 100%;
+            background: #0b57d0;
+            color: white;
+            border: 0;
+            border-radius: 11px;
+            padding: 12px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #06327e;
+            transition: .2s;
+            transform: translateZ(25px)
+        }
+        
+        .buy:active {
+            transform: translateZ(10px) translateY(4px);
+            box-shadow: 0 2px 0 #06327e
+        }
+        
+        .panel {
+            max-width: 850px;
+            margin: auto
+        }
+        
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 0 auto 25px;
+            max-width: 900px
+        }
+        
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            border-radius: 12px;
+            background: #e2e8f0;
+            color: #64748b;
+            font-weight: 800
+        }
+        
+        .step.active {
+            background: #0b57d0;
+            color: white;
+            box-shadow: 0 8px 20px #0b57d044
+        }
+        
+        .step.done {
+            background: #dcfce7;
+            color: #15803d
+        }
+        
+        .field {
+            margin: 14px 0
+        }
+        
+        .field label {
+            display: block;
+            font-weight: 800;
+            margin-bottom: 7px
+        }
+        
+        .field input,
+        .field textarea,
+        .field select {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 11px;
+            background: white;
+            font-size: 15px
+        }
+        
+        .field input:focus,
+        .field textarea:focus {
+            outline: 2px solid #93c5fd;
+            box-shadow: 0 10px 25px #0b57d01a
+        }
+        
+        .address-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px
+        }
+        
+        .full {
+            grid-column: 1/-1
+        }
+        
+        .pay-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 13px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #fff;
+            cursor: pointer
+        }
+        
+        .pay-option:has(input:checked) {
+            border: 2px solid #0b57d0;
+            background: #eff6ff;
+            box-shadow: 0 10px 25px #0b57d01c
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            padding: 18px;
+            border-radius: 15px;
+            background: #f8fafc;
+            margin: 18px 0
+        }
+        
+        .success {
+            text-align: center;
+            padding: 50px
+        }
+        
+        .success-icon {
+            font-size: 72px;
+            animation: pop .7s ease
+        }
+        
+        .timeline {
+            display: grid;
+            gap: 0
+        }
+        
+        .track {
+            display: grid;
+            grid-template-columns: 42px 1fr;
+            gap: 15px;
+            min-height: 85px
+        }
+        
+        .dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #cbd5e1;
+            margin-top: 3px;
+            box-shadow: 0 0 0 7px #e2e8f0
+        }
+        
+        .track.done .dot {
+            background: #16a34a;
+            box-shadow: 0 0 0 7px #dcfce7
+        }
+        
+        .line {
+            width: 3px;
+            background: #cbd5e1;
+            height: 65px;
+            margin: 7px 0 0 8px
+        }
+        
+        .track.done .line {
+            background: #86efac
+        }
+        
+        .order-card {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 15px;
+            margin: 15px 0;
+            padding: 18px;
+            border-radius: 16px;
+            background: white;
+            box-shadow: 0 12px 35px #0f172a12
+        }
+        
+        .pill {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #dcfce7;
+            color: #15803d;
+            font-size: 12px;
+            font-weight: 900
+        }
+        
+        .muted {
+            color: var(--muted)
+        }
+        
+        .row {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px
+        }
+        
+        .danger {
+            color: #b91c1c
+        }
+        
+        .footer {
+            text-align: center;
+            color: #64748b;
+            padding: 35px
+        }
+        
+        @keyframes pop {
+            0% {
+                transform: scale(.4) rotateY(90deg);
+                opacity: 0
+            }
+            70% {
+                transform: scale(1.15) rotateY(-8deg)
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1
+            }
+        }
+        
+        @media(max-width:650px) {
+            .top {
+                flex-wrap: wrap
+            }
+            .nav {
+                margin-left: 0;
+                width: 100%;
+                justify-content: space-between
+            }
+            .hero {
+                padding: 28px;
+                min-height: 380px
+            }
+            .address-grid {
+                grid-template-columns: 1fr
+            }
+            .full {
+                grid-column: auto
+            }
+            .steps {
+                overflow: auto
+            }
+            .step {
+                min-width: 120px
+            }
+            .order-card {
+                grid-template-columns: 1fr
+            }
+            .row {
+                justify-content: stretch
+            }
+            .row .btn {
+                flex: 1
+            }
+        }
+        
+        .auth-box {
+            max-width: 560px;
+            margin: 28px auto
+        }
+        
+        .auth-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+        
+        .auth-actions .btn {
+            flex: 1
+        }
+        
+        .hidden {
+            display: none!important
+        }
+        
+        .otp-note {
+            padding: 12px;
+            border-radius: 12px;
+            background: #eff6ff;
+            color: #1e3a8a;
+            margin: 12px 0
+        }
+        
+        .logout {
+            background: #fee2e2!important;
+            color: #991b1b!important;
+            box-shadow: none!important
+        }
+        
+        .message {
+            font-weight: 800;
+            min-height: 22px;
+            margin-top: 12px
+        }
+        
+        .ok {
+            color: #15803d
+        }
+        
+        .danger-text {
+            color: #b91c1c
+        }
+        
+        .phone-chip {
+            display: inline-block;
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: #e0e7ff;
+            color: #3730a3;
+            font-weight: 800;
+            margin-bottom: 15px
+        }
+        
+        .hidden {
+            display: none!important
+        }
+        
+        .danger-text {
+            color: #b91c1c;
+            font-weight: 800
+        }
+        
+        .secure-note {
+            padding: 12px;
+            border-radius: 12px;
+            background: #eff6ff;
+            color: #1e3a8a;
+            margin: 12px 0
+        }
+        
+        .login-box {
+            max-width: 650px;
+            margin: auto
+        }
+        
+        .login-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+        
+        .login-actions .btn {
+            flex: 1
+        }
+        
+        .email-label {
+            word-break: break-word
+        }
+    </style>
+</head>
 
-.hidden{display:none!important}.danger-text{color:#b91c1c;font-weight:800}.secure-note{padding:12px;border-radius:12px;background:#eff6ff;color:#1e3a8a;margin:12px 0}.login-box{max-width:650px;margin:auto}.login-actions{display:flex;gap:10px;flex-wrap:wrap}.login-actions .btn{flex:1}.email-label{word-break:break-word}</style></head><body>
-<header class="top"><a class="logo" href="index.html">MAHALAKSHIMI ✦ STORE</a><nav class="nav"><a href="index.html">Shop</a><a href="orders.html">My Orders</a></nav></header>
-<main class="wrap">
-<section id="loginPanel" class="panel login-box">
-<h2>📧 My Orders Login</h2>
-<div class="secure-note">Enter the same email address used at checkout. We will send a 6-digit OTP to that email.</div>
-<div id="emailStep">
-<div class="field"><label>Email Address</label><input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com"></div>
-<div class="login-actions"><button id="sendOtpBtn" class="btn" style="background:#0b57d0;color:white">Send Email OTP</button></div>
-</div>
-<div id="otpStep" class="hidden">
-<div class="field"><label>6-digit OTP</label><input id="otp" inputmode="numeric" maxlength="6" placeholder="Enter OTP"></div>
-<div class="login-actions"><button id="verifyOtpBtn" class="btn" style="background:#0b57d0;color:white">Verify & Show My Orders</button><button id="changeEmailBtn" class="btn">Change Email</button></div>
-</div>
-<p id="loginMsg" class="danger-text"></p>
-</section>
-<section id="ordersPanel" class="hidden">
-<div class="panel"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><div><h2>📦 My Orders</h2><p id="verifiedEmailLabel" class="muted email-label"></p></div><button id="logoutBtn" class="btn">Logout</button></div></div>
-<div id="ordersBox"></div>
-</section>
-</main><div class="footer">Secure shopping • Email OTP • Private order history</div>
-<script>
-const API="https://mahalakshmi-backend-wy3h.onrender.com";
-const TOKEN_KEY="customerOrderToken",EMAIL_KEY="customerOrderEmail";
-const el=id=>document.getElementById(id);
-let activeEmail="";
-function esc(v){return String(v||"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
-function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||"").trim().toLowerCase())}
-async function json(r){const type=r.headers.get("content-type")||"";if(!type.includes("application/json")){await r.text();throw Error("Backend is not updated yet. Deploy the latest server.js.")}return r.json()}
-function showLogin(){el("loginPanel").classList.remove("hidden");el("ordersPanel").classList.add("hidden")}
-function showOtp(){el("emailStep").classList.add("hidden");el("otpStep").classList.remove("hidden");el("otp").focus()}
-function changeEmail(){activeEmail="";el("otp").value="";el("otpStep").classList.add("hidden");el("emailStep").classList.remove("hidden");el("loginMsg").textContent="";el("loginEmail").focus()}
-async function sendOtp(){activeEmail=String(el("loginEmail").value||"").trim().toLowerCase();if(!validEmail(activeEmail)){el("loginMsg").textContent="Enter a valid email address.";return}el("sendOtpBtn").disabled=true;el("loginMsg").textContent="Sending OTP...";try{const r=await fetch(API+"/customer/auth/send-email-otp",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:activeEmail})});const d=await json(r);if(!r.ok)throw Error(d.message||"Could not send OTP");el("loginMsg").textContent="OTP sent. Check your email inbox/spam folder.";showOtp()}catch(e){el("loginMsg").textContent=e.message}finally{el("sendOtpBtn").disabled=false}}
-async function verifyOtp(){const code=String(el("otp").value||"").replace(/\D/g,"");if(!validEmail(activeEmail)||!/^[0-9]{6}$/.test(code)){el("loginMsg").textContent="Enter the 6-digit OTP.";return}el("verifyOtpBtn").disabled=true;el("loginMsg").textContent="Verifying...";try{const r=await fetch(API+"/customer/auth/verify-email-otp",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:activeEmail,code})});const d=await json(r);if(!r.ok)throw Error(d.message||"OTP verification failed");sessionStorage.setItem(TOKEN_KEY,d.token);sessionStorage.setItem(EMAIL_KEY,d.email||activeEmail);const track=new URLSearchParams(location.search).get("track");if(track&&/^[a-fA-F0-9]{24}$/.test(track)){location.href="order-track.html?id="+encodeURIComponent(track);return}showOrders()}catch(e){el("loginMsg").textContent=e.message}finally{el("verifyOtpBtn").disabled=false}}
-async function showOrders(){const token=sessionStorage.getItem(TOKEN_KEY);if(!token){showLogin();return}el("loginPanel").classList.add("hidden");el("ordersPanel").classList.remove("hidden");const email=sessionStorage.getItem(EMAIL_KEY)||"";el("verifiedEmailLabel").textContent=email?"Verified email: "+email:"";const box=el("ordersBox");box.innerHTML='<div class="panel">Loading your orders...</div>';try{const r=await fetch(API+"/customer/orders",{headers:{Authorization:"Bearer "+token}});const list=await json(r);if(r.status===401){logout();return}if(!r.ok)throw Error(list.message||"Could not load orders");if(!Array.isArray(list)||!list.length){box.innerHTML='<div class="panel"><h3>No orders found</h3><p class="muted">No orders are linked to this verified email yet.</p></div>';return}box.innerHTML=list.map(o=>`<article class="order-card"><div><h3>${esc(o.productName||"Product")}</h3><p class="muted">Order ID: ${esc(o._id)}</p><p class="muted">${esc(o.customerName||"")} • ${esc(o.city||"")}</p><span class="pill">${esc(o.orderStatus||"Placed")}</span></div><div><h3>₹${Number(o.price||0).toLocaleString("en-IN")}</h3><a class="btn" href="order-track.html?id=${encodeURIComponent(o._id)}">Track Order</a></div></article>`).join("")}catch(e){box.innerHTML='<div class="panel danger-text">'+esc(e.message)+'</div>'}}
-function logout(){sessionStorage.removeItem(TOKEN_KEY);sessionStorage.removeItem(EMAIL_KEY);location.href="orders.html"}
-el("sendOtpBtn").addEventListener("click",sendOtp);el("verifyOtpBtn").addEventListener("click",verifyOtp);el("changeEmailBtn").addEventListener("click",changeEmail);el("logoutBtn").addEventListener("click",logout);el("loginEmail").addEventListener("keydown",e=>{if(e.key==="Enter")sendOtp()});el("otp").addEventListener("keydown",e=>{if(e.key==="Enter")verifyOtp()});
-if(sessionStorage.getItem(TOKEN_KEY)){const track=new URLSearchParams(location.search).get("track");if(track&&/^[a-fA-F0-9]{24}$/.test(track))location.href="order-track.html?id="+encodeURIComponent(track);else showOrders()}else showLogin();
-</script></body></html>
+<body>
+    <header class="top"><a class="logo" href="index.html">MAHALAKSHIMI ✦ STORE</a>
+        <nav class="nav"><a href="index.html">Shop</a><a href="orders.html">My Orders</a></nav>
+    </header>
+    <main class="wrap">
+        <section id="loginPanel" class="panel login-box">
+            <h2>📧 My Orders Login</h2>
+            <div class="secure-note">Enter the same email address used at checkout. We will send a 6-digit OTP to that email.</div>
+            <div id="emailStep">
+                <div class="field"><label>Email Address</label><input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com"></div>
+                <div class="login-actions"><button id="sendOtpBtn" class="btn" style="background:#0b57d0;color:white">Send Email OTP</button></div>
+            </div>
+            <div id="otpStep" class="hidden">
+                <div class="field"><label>6-digit OTP</label><input id="otp" inputmode="numeric" maxlength="6" placeholder="Enter OTP"></div>
+                <div class="login-actions"><button id="verifyOtpBtn" class="btn" style="background:#0b57d0;color:white">Verify & Show My Orders</button><button id="changeEmailBtn" class="btn">Change Email</button></div>
+            </div>
+            <p id="loginMsg" class="danger-text"></p>
+        </section>
+        <section id="ordersPanel" class="hidden">
+            <div class="panel">
+                <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+                    <div>
+                        <h2>📦 My Orders</h2>
+                        <p id="verifiedEmailLabel" class="muted email-label"></p>
+                    </div><button id="logoutBtn" class="btn">Logout</button></div>
+            </div>
+            <div id="ordersBox"></div>
+        </section>
+    </main>
+    <div class="footer">Secure shopping • Email OTP • Private order history</div>
+    <script>
+        const API = "https://mahalakshmi-backend-api.onrender.com";
+        const TOKEN_KEY = "customerOrderToken",
+            EMAIL_KEY = "customerOrderEmail";
+        const el = id => document.getElementById(id);
+        let activeEmail = "";
+
+        function esc(v) {
+            return String(v || "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;")
+        }
+
+        function validEmail(v) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || "").trim().toLowerCase())
+        }
+        async function json(r) {
+            const type = r.headers.get("content-type") || "";
+            if (!type.includes("application/json")) {
+                await r.text();
+                throw Error("Backend is not updated yet. Deploy the latest server.js.")
+            }
+            return r.json()
+        }
+
+        function showLogin() {
+            el("loginPanel").classList.remove("hidden");
+            el("ordersPanel").classList.add("hidden")
+        }
+
+        function showOtp() {
+            el("emailStep").classList.add("hidden");
+            el("otpStep").classList.remove("hidden");
+            el("otp").focus()
+        }
+
+        function changeEmail() {
+            activeEmail = "";
+            el("otp").value = "";
+            el("otpStep").classList.add("hidden");
+            el("emailStep").classList.remove("hidden");
+            el("loginMsg").textContent = "";
+            el("loginEmail").focus()
+        }
+        async function sendOtp() {
+            activeEmail = String(el("loginEmail").value || "").trim().toLowerCase();
+            if (!validEmail(activeEmail)) {
+                el("loginMsg").textContent = "Enter a valid email address.";
+                return
+            }
+            el("sendOtpBtn").disabled = true;
+            el("loginMsg").textContent = "Sending OTP...";
+            try {
+                const r = await fetch(API + "/customer/auth/send-email-otp", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email: activeEmail
+                    })
+                });
+                const d = await json(r);
+                if (!r.ok) throw Error(d.message || "Could not send OTP");
+                el("loginMsg").textContent = "OTP sent. Check your email inbox/spam folder.";
+                showOtp()
+            } catch (e) {
+                el("loginMsg").textContent = e.message
+            } finally {
+                el("sendOtpBtn").disabled = false
+            }
+        }
+        async function verifyOtp() {
+            const code = String(el("otp").value || "").replace(/\D/g, "");
+            if (!validEmail(activeEmail) || !/^[0-9]{6}$/.test(code)) {
+                el("loginMsg").textContent = "Enter the 6-digit OTP.";
+                return
+            }
+            el("verifyOtpBtn").disabled = true;
+            el("loginMsg").textContent = "Verifying...";
+            try {
+                const r = await fetch(API + "/customer/auth/verify-email-otp", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        email: activeEmail,
+                        code
+                    })
+                });
+                const d = await json(r);
+                if (!r.ok) throw Error(d.message || "OTP verification failed");
+                sessionStorage.setItem(TOKEN_KEY, d.token);
+                sessionStorage.setItem(EMAIL_KEY, d.email || activeEmail);
+                const track = new URLSearchParams(location.search).get("track");
+                if (track && /^[a-fA-F0-9]{24}$/.test(track)) {
+                    location.href = "order-track.html?id=" + encodeURIComponent(track);
+                    return
+                }
+                showOrders()
+            } catch (e) {
+                el("loginMsg").textContent = e.message
+            } finally {
+                el("verifyOtpBtn").disabled = false
+            }
+        }
+        async function showOrders() {
+            const token = sessionStorage.getItem(TOKEN_KEY);
+            if (!token) {
+                showLogin();
+                return
+            }
+            el("loginPanel").classList.add("hidden");
+            el("ordersPanel").classList.remove("hidden");
+            const email = sessionStorage.getItem(EMAIL_KEY) || "";
+            el("verifiedEmailLabel").textContent = email ? "Verified email: " + email : "";
+            const box = el("ordersBox");
+            box.innerHTML = '<div class="panel">Loading your orders...</div>';
+            try {
+                const r = await fetch(API + "/customer/orders", {
+                    headers: {
+                        Authorization: "Bearer " + token
+                    }
+                });
+                const list = await json(r);
+                if (r.status === 401) {
+                    logout();
+                    return
+                }
+                if (!r.ok) throw Error(list.message || "Could not load orders");
+                if (!Array.isArray(list) || !list.length) {
+                    box.innerHTML = '<div class="panel"><h3>No orders found</h3><p class="muted">No orders are linked to this verified email yet.</p></div>';
+                    return
+                }
+                box.innerHTML = list.map(o => `<article class="order-card"><div><h3>${esc(o.productName||"Product")}</h3><p class="muted">Order ID: ${esc(o._id)}</p><p class="muted">${esc(o.customerName||"")} • ${esc(o.city||"")}</p><span class="pill">${esc(o.orderStatus||"Placed")}</span></div><div><h3>₹${Number(o.price||0).toLocaleString("en-IN")}</h3><a class="btn" href="order-track.html?id=${encodeURIComponent(o._id)}">Track Order</a></div></article>`).join("")
+            } catch (e) {
+                box.innerHTML = '<div class="panel danger-text">' + esc(e.message) + '</div>'
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem(TOKEN_KEY);
+            sessionStorage.removeItem(EMAIL_KEY);
+            location.href = "orders.html"
+        }
+        el("sendOtpBtn").addEventListener("click", sendOtp);
+        el("verifyOtpBtn").addEventListener("click", verifyOtp);
+        el("changeEmailBtn").addEventListener("click", changeEmail);
+        el("logoutBtn").addEventListener("click", logout);
+        el("loginEmail").addEventListener("keydown", e => {
+            if (e.key === "Enter") sendOtp()
+        });
+        el("otp").addEventListener("keydown", e => {
+            if (e.key === "Enter") verifyOtp()
+        });
+        if (sessionStorage.getItem(TOKEN_KEY)) {
+            const track = new URLSearchParams(location.search).get("track");
+            if (track && /^[a-fA-F0-9]{24}$/.test(track)) location.href = "order-track.html?id=" + encodeURIComponent(track);
+            else showOrders()
+        } else showLogin();
+    </script>
+</body>
+
+</html>

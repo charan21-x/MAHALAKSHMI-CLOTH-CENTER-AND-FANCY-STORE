@@ -1,4 +1,4 @@
-const API_URL = "https://mahalakshmi-backend-wy3h.onrender.com";
+const API_URL = "https://mahalakshmi-backend-api.onrender.com";
 
 async function loadOrders() {
     const table = document.getElementById("ordersTable");
