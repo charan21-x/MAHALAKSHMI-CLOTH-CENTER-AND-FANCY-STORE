@@ -559,6 +559,11 @@ async function start() {
 
         orderStatus: "Placed",
 
+        // Admin inbox state: new orders stay in Today's New Orders
+        // until the admin opens/views them.
+        adminSeen: false,
+        adminSeenAt: null,
+
         createdAt: new Date()
       };
 
@@ -912,7 +917,8 @@ async function start() {
 
           ...buildCustomerFields(
             x,
-            delivery.phone
+            delivery.phone,
+            delivery.email
           ),
 
           paymentMethod:
@@ -921,6 +927,11 @@ async function start() {
           paymentStatus: "Paid",
 
           orderStatus: "Placed",
+
+          // Admin inbox state: new orders stay in Today's New Orders
+          // until the admin opens/views them.
+          adminSeen: false,
+          adminSeenAt: null,
 
           razorpayOrderId:
             attempt.razorpayOrderId,
@@ -1314,6 +1325,86 @@ async function start() {
     }
   );
 
+  // Today's unseen orders, calculated using India Standard Time.
+  // Old orders that pre-date adminSeen are treated as unseen only if
+  // they were actually created today.
+  app.get(
+    "/admin/orders/today-new",
+    requireAdmin,
+    async (req, res) => {
+      try {
+        const parts = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Asia/Kolkata",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        }).formatToParts(new Date());
+
+        const byType = Object.fromEntries(
+          parts.map(part => [part.type, part.value])
+        );
+
+        const ymd = `${byType.year}-${byType.month}-${byType.day}`;
+        const start = new Date(`${ymd}T00:00:00.000+05:30`);
+        const end = new Date(`${ymd}T23:59:59.999+05:30`);
+
+        const list = await orders
+          .find({
+            createdAt: { $gte: start, $lte: end },
+            adminSeen: { $ne: true }
+          })
+          .sort({ createdAt: -1 })
+          .toArray();
+
+        res.json(list);
+      } catch (e) {
+        console.error("Today new orders error:", e);
+        res.status(500).json({
+          message: "Unable to load today's new orders"
+        });
+      }
+    }
+  );
+
+  // Mark an order as seen when the admin opens it.
+  app.patch(
+    "/admin/orders/:id/seen",
+    requireAdmin,
+    async (req, res) => {
+      try {
+        if (!ObjectId.isValid(req.params.id)) {
+          return res.status(400).json({
+            message: "Invalid order ID"
+          });
+        }
+
+        const result = await orders.updateOne(
+          { _id: new ObjectId(req.params.id) },
+          {
+            $set: {
+              adminSeen: true,
+              adminSeenAt: new Date()
+            }
+          }
+        );
+
+        if (!result.matchedCount) {
+          return res.status(404).json({
+            message: "Order not found"
+          });
+        }
+
+        res.json({ acknowledged: true });
+      } catch (e) {
+        console.error("Mark order seen error:", e);
+        res.status(500).json({
+          message: "Unable to mark order as seen"
+        });
+      }
+    }
+  );
+
+  // Complete order history, newest first.
   app.get(
     "/admin/orders",
     requireAdmin,

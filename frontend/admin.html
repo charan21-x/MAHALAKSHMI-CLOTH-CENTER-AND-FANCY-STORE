@@ -1,71 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel</title>
-
-    <style>
-        body{
-            font-family:Arial;
-            background:#f5f5f5;
-            margin:0;
-        }
-
-        header{
-            background:#000;
-            color:white;
-            padding:15px;
-            text-align:center;
-        }
-
-        table{
-            width:90%;
-            margin:20px auto;
-            border-collapse:collapse;
-            background:white;
-        }
-
-        th,td{
-            border:1px solid #ccc;
-            padding:10px;
-            text-align:center;
-        }
-
-        th{
-            background:#333;
-            color:white;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAHALAKSHIMI Admin - Orders</title>
+  <style>
+    :root{--bg:#f4f7f5;--card:#fff;--ink:#17211b;--muted:#66736b;--brand:#16803b;--brand2:#0f5f2b;--line:#dfe8e1;--danger:#b42318;--warn:#b54708;--shadow:0 14px 38px rgba(20,50,31,.10)}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    .top{background:#101713;color:#fff;padding:16px 5%;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:20;box-shadow:0 5px 20px #0003}
+    .brand{font-size:20px;font-weight:900;letter-spacing:.4px}.brand small{display:block;font-size:10px;color:#a8b4ac;letter-spacing:1.2px;margin-top:2px}
+    .top .spacer{margin-left:auto}.logout{border:1px solid #ffffff44;background:transparent;color:#fff;padding:9px 13px;border-radius:10px;cursor:pointer}
+    .wrap{width:min(1220px,94%);margin:28px auto}.card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+    #loginView{max-width:440px;margin:70px auto;padding:28px} h1,h2,h3{margin-top:0}.muted{color:var(--muted)}
+    label{font-weight:800;font-size:14px;display:block;margin:14px 0 7px}input{width:100%;padding:13px;border:1px solid #c9d5cd;border-radius:11px;font-size:15px}
+    input:focus{outline:2px solid #a9d9b8;border-color:var(--brand)}button{font:inherit}.primary{width:100%;margin-top:18px;background:var(--brand);color:#fff;border:0;border-radius:11px;padding:13px;font-weight:900;cursor:pointer}.primary:hover{background:var(--brand2)}
+    .error{color:var(--danger);font-weight:800;margin-top:12px;min-height:20px}.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:18px}.toolbar h1{margin:0;margin-right:auto}
+    .refresh{border:0;background:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 3px 12px #0001;cursor:pointer;font-weight:800}
+    .tabs{display:flex;gap:10px;margin:18px 0}.tab{border:1px solid var(--line);background:#fff;padding:11px 16px;border-radius:12px;cursor:pointer;font-weight:900}.tab.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+    .badge{display:inline-flex;min-width:23px;height:23px;padding:0 7px;border-radius:999px;align-items:center;justify-content:center;background:#e8f7ed;color:var(--brand2);font-size:12px;margin-left:6px}.tab.active .badge{background:#fff;color:var(--brand)}
+    .section{padding:20px}.section-head{display:flex;align-items:center;gap:10px;justify-content:space-between;margin-bottom:14px}.section-head h2{margin:0}.empty{padding:40px 15px;text-align:center;color:var(--muted)}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:13px}table{width:100%;border-collapse:collapse;min-width:950px;background:#fff}th,td{padding:12px 13px;border-bottom:1px solid #edf1ee;text-align:left;font-size:14px;vertical-align:top}th{background:#f6faf7;color:#4d5c52;font-size:12px;text-transform:uppercase;letter-spacing:.4px}tr:hover td{background:#fbfdfb}
+    .new-pill,.seen-pill,.pay-pill{display:inline-block;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:900}.new-pill{background:#e8f7ed;color:#0f6b2e}.seen-pill{background:#eef1ef;color:#65726a}.pay-pill{background:#eef4ff;color:#315ca8}.view-btn{border:0;background:#17211b;color:#fff;padding:8px 11px;border-radius:9px;cursor:pointer;font-weight:800;white-space:nowrap}
+    .order-id{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;color:#4f5b53}.price{font-weight:900;color:var(--brand2)}
+    .modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;padding:18px;z-index:50}.modal.show{display:flex}.modal-card{width:min(700px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:22px;box-shadow:0 30px 90px #0005}.modal-top{display:flex;gap:10px;align-items:center}.modal-top h2{margin:0}.close{margin-left:auto;border:0;background:#eef1ef;width:36px;height:36px;border-radius:50%;font-size:20px;cursor:pointer}
+    .details{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.detail{border:1px solid var(--line);border-radius:12px;padding:12px}.detail.full{grid-column:1/-1}.detail b{display:block;font-size:11px;text-transform:uppercase;color:var(--muted);margin-bottom:5px}.detail span{font-weight:700;word-break:break-word}
+    .loading{text-align:center;padding:30px;color:var(--muted);font-weight:800}.hidden{display:none!important}
+    @media(max-width:650px){.wrap{width:94%;margin:16px auto}.toolbar h1{width:100%}.details{grid-template-columns:1fr}.detail.full{grid-column:auto}.brand{font-size:16px}.top{padding:13px 4%}}
+  </style>
 </head>
-
 <body>
+  <header class="top">
+    <div class="brand">MAHALAKSHIMI <small>CLOTH CENTER & FANCY STORE — ADMIN</small></div>
+    <div class="spacer"></div>
+    <button id="logoutBtn" class="logout hidden" type="button">Logout</button>
+  </header>
 
-<header>
-    <h1>Admin Panel</h1>
-</header>
+  <main class="wrap">
+    <section id="loginView" class="card">
+      <h2>Admin Login</h2>
+      <p class="muted">Login to view today's new orders and complete order history.</p>
+      <label for="username">Username</label>
+      <input id="username" autocomplete="username" placeholder="Admin username">
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="Admin password">
+      <button id="loginBtn" class="primary" type="button">LOGIN</button>
+      <div id="loginError" class="error"></div>
+    </section>
 
-<h2 style="text-align:center;">Customer Orders</h2>
+    <section id="dashboardView" class="hidden">
+      <div class="toolbar">
+        <h1>Orders Dashboard</h1>
+        <button id="refreshBtn" class="refresh" type="button">↻ Refresh</button>
+      </div>
 
-<table>
+      <div class="tabs">
+        <button class="tab active" data-tab="new" type="button">Today's New Orders <span id="newCount" class="badge">0</span></button>
+        <button class="tab" data-tab="all" type="button">All Orders <span id="allCount" class="badge">0</span></button>
+      </div>
 
-<thead>
-<tr>
-<th>Customer</th>
-<th>Phone</th>
-<th>Product</th>
-<th>Price</th>
-<th>Address</th>
-</tr>
-</thead>
+      <section id="newSection" class="card section">
+        <div class="section-head"><h2>Today's New Orders</h2><span class="muted">Unseen orders booked today</span></div>
+        <div id="newOrdersBox" class="loading">Loading...</div>
+      </section>
 
-<tbody id="ordersTable">
+      <section id="allSection" class="card section hidden">
+        <div class="section-head"><h2>All Orders</h2><span class="muted">Complete order history</span></div>
+        <div id="allOrdersBox" class="loading">Loading...</div>
+      </section>
+    </section>
+  </main>
 
-</tbody>
+  <div id="orderModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-top"><h2>Order Details</h2><button id="closeModal" class="close" type="button">×</button></div>
+      <div id="orderDetails"></div>
+    </div>
+  </div>
 
-</table>
-
-<script src="admin.js"></script>
-
+  <script src="admin.js"></script>
 </body>
 </html>
