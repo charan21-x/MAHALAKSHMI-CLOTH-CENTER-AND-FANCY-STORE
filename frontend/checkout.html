@@ -571,9 +571,22 @@
                 return values.some(value => placeMatches(city, value));
             });
 
-            if (!areaMatch || !cityMatch) {
-                err("Address and pincode do not match. Check Area/Village, City/Town and Pincode.");
+            // The India postal dataset does not always use the customer-facing
+            // city/town name. For example, it may return a District, Division,
+            // Taluk or postal office name instead. Requiring BOTH area and city
+            // therefore rejects some correct addresses.
+            //
+            // We hard-check the locality (Area/Village) against the PIN's postal
+            // records. City/Town is used as an additional signal when available,
+            // but it does not block a verified locality because the postal dataset
+            // may use a different administrative name.
+            if (!areaMatch) {
+                err("Area / Village does not match this pincode. Please check the locality name and pincode.");
                 return false;
+            }
+
+            if (!cityMatch) {
+                console.warn("City/Town name differs from postal dataset, but locality and pincode match.");
             }
 
             return true;
@@ -596,11 +609,46 @@
             if (a === b || a.includes(b) || b.includes(a)) return true;
 
             const aWords = a.split(" ").filter(word => word.length > 2);
-            const bWords = new Set(b.split(" ").filter(word => word.length > 2));
-            if (!aWords.length || !bWords.size) return false;
+            const bWords = b.split(" ").filter(word => word.length > 2);
+            if (!aWords.length || !bWords.length) return false;
 
-            const matchedWords = aWords.filter(word => bWords.has(word)).length;
+            // Allow small spelling differences such as one missing/extra letter.
+            const wordMatch = (x, y) => {
+                if (x === y || x.includes(y) || y.includes(x)) return true;
+                if (Math.min(x.length, y.length) < 4) return false;
+                return similarity(x, y) >= 0.72;
+            };
+
+            const matchedWords = aWords.filter(x =>
+                bWords.some(y => wordMatch(x, y))
+            ).length;
+
             return matchedWords >= Math.max(1, Math.ceil(aWords.length * 0.6));
+        }
+
+        function similarity(a, b) {
+            const longer = a.length >= b.length ? a : b;
+            const shorter = a.length >= b.length ? b : a;
+            if (!longer.length) return 1;
+            return (longer.length - levenshtein(longer, shorter)) / longer.length;
+        }
+
+        function levenshtein(a, b) {
+            const row = Array.from({ length: b.length + 1 }, (_, i) => i);
+            for (let i = 1; i <= a.length; i++) {
+                let prev = row[0];
+                row[0] = i;
+                for (let j = 1; j <= b.length; j++) {
+                    const old = row[j];
+                    row[j] = Math.min(
+                        row[j] + 1,
+                        row[j - 1] + 1,
+                        prev + (a[i - 1] === b[j - 1] ? 0 : 1)
+                    );
+                    prev = old;
+                }
+            }
+            return row[b.length];
         }
 
         function g(id) {
