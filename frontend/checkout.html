@@ -571,22 +571,18 @@
                 return values.some(value => placeMatches(city, value));
             });
 
-            // The India postal dataset does not always use the customer-facing
-            // city/town name. For example, it may return a District, Division,
-            // Taluk or postal office name instead. Requiring BOTH area and city
-            // therefore rejects some correct addresses.
+            // India Post PIN data is organized around post offices and
+            // administrative areas. A genuine village/locality is not always
+            // listed as an exact PostOffice Name. To avoid rejecting genuine
+            // customers, accept the address when the PIN is valid and EITHER
+            // the Area/Village OR City/Town matches one of the PIN's postal
+            // locality / block / taluk / division / region / district values.
             //
-            // We hard-check the locality (Area/Village) against the PIN's postal
-            // records. City/Town is used as an additional signal when available,
-            // but it does not block a verified locality because the postal dataset
-            // may use a different administrative name.
-            if (!areaMatch) {
-                err("Area / Village does not match this pincode. Please check the locality name and pincode.");
+            // This still blocks a random locality + city used with an unrelated
+            // PIN, while avoiding false rejects caused by postal naming differences.
+            if (!areaMatch && !cityMatch) {
+                err("Area / City does not match this pincode. Please check the locality, city and pincode.");
                 return false;
-            }
-
-            if (!cityMatch) {
-                console.warn("City/Town name differs from postal dataset, but locality and pincode match.");
             }
 
             return true;
