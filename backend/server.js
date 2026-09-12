@@ -368,6 +368,8 @@ function buildCustomerFields(
   };
 }
 
+
+
 async function start() {
   await client.connect();
 
@@ -900,11 +902,13 @@ async function start() {
               ? attempt.productSnapshot.name
               : product.name,
 
+          // Exact image captured when the Razorpay payment order was created.
+          // Do not replace it with a newer/current product image.
           productImage:
             attempt.productSnapshot &&
             attempt.productSnapshot.image
               ? attempt.productSnapshot.image
-              : (product.image || product.imageUrl || ""),
+              : "",
 
           price:
             Number(attempt.amount) /
@@ -1419,14 +1423,12 @@ async function start() {
     requireAdmin,
     async (req, res) => {
       try {
-        res.json(
-          await orders
-            .find({})
-            .sort({
-              createdAt: -1
-            })
-            .toArray()
-        );
+        const list = await orders
+          .find({})
+          .sort({ createdAt: -1 })
+          .toArray();
+
+        res.json(list);
       } catch (e) {
         res.status(500).json({
           message:

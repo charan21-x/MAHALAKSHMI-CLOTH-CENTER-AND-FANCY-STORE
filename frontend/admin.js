@@ -4,7 +4,6 @@ const TOKEN_KEY = "mahalakshmiAdminToken";
 let adminToken = sessionStorage.getItem(TOKEN_KEY) || "";
 let newOrders = [];
 let allOrders = [];
-let productsById = new Map();
 
 const $ = id => document.getElementById(id);
 
@@ -92,16 +91,12 @@ async function safeJson(r) {
 async function loadOrders() {
   setLoading();
   try {
-    const [todayList, allList, productList] = await Promise.all([
+    const [todayList, allList] = await Promise.all([
       api("/admin/orders/today-new"),
-      api("/admin/orders"),
-      api("/products").catch(() => [])
+      api("/admin/orders")
     ]);
     newOrders = Array.isArray(todayList) ? todayList : [];
     allOrders = Array.isArray(allList) ? allList : [];
-    productsById = new Map(
-      (Array.isArray(productList) ? productList : []).map(p => [String(p._id || ""), p])
-    );
     $("newCount").textContent = newOrders.length;
     $("allCount").textContent = allOrders.length;
     renderOrders($("newOrdersBox"), newOrders, true);
@@ -135,8 +130,8 @@ function renderOrders(box, orders, isNewList) {
     const status = o.adminSeen === true ? '<span class="seen-pill">SEEN</span>' : '<span class="new-pill">NEW</span>';
     const image = productImageFor(o);
     const productHtml = image
-      ? `<div class="product-cell"><img class="product-thumb" src="${esc(image)}" alt=""><span>${esc(o.productName || "-")}</span></div>`
-      : `<div class="product-cell"><div class="product-placeholder">IMG</div><span>${esc(o.productName || "-")}</span></div>`;
+      ? `<div class="product-cell"><img class="product-thumb" src="${esc(image)}" alt="" onerror="this.style.display='none'"><span>${esc(o.productName || "-")}</span></div>`
+      : `<div class="product-cell"><div class="product-placeholder">NO PHOTO</div><span>${esc(o.productName || "-")}</span></div>`;
     return `<tr>
       <td><div class="order-id">${esc(shortId(o._id))}</div><div style="margin-top:5px">${status}</div></td>
       <td><b>${esc(o.customerName || "-")}</b><br><span class="muted">${esc(o.phone || "-")}</span></td>
@@ -184,7 +179,7 @@ function showOrderDetails(o) {
   const fullAddress = [o.doorNo, o.areaVillage, o.city, o.state, o.pincode].filter(Boolean).join(", ") || o.address || "-";
   const image = productImageFor(o);
   const imageBlock = image
-    ? `<div class="order-image-wrap"><img class="order-image" src="${esc(image)}" alt="${esc(o.productName || "Product")}"></div>`
+    ? `<div class="order-image-wrap"><img class="order-image" src="${esc(image)}" alt="${esc(o.productName || "Product")}" onerror="this.closest('.order-image-wrap').style.display='none'"></div>`
     : "";
   $("orderDetails").innerHTML = `${imageBlock}<div class="details">
     ${detail("Order ID", String(o._id || "-"))}
@@ -209,10 +204,25 @@ function detail(label, value, full = false) {
 }
 
 function productImageFor(order) {
-  const direct = String(order.productImage || order.image || order.imageUrl || "").trim();
-  if (direct) return direct;
-  const product = productsById.get(String(order.productId || ""));
-  return product ? String(product.image || product.imageUrl || "").trim() : "";
+  // Exact-image rule: show ONLY the image snapshot saved with this order.
+  // Never guess by product name or fetch a newer/current product photo.
+  return normalizeImageUrl(order.productImage || "");
+}
+
+function normalizeImageUrl(value) {
+  let src = String(value || "").trim();
+  if (!src) return "";
+
+  if (/^(https?:|data:|blob:)/i.test(src)) return src;
+  if (src.startsWith("//")) return "https:" + src;
+
+  // Some older product records stored frontend-relative paths.
+  src = src.replace(/^\.\//, "").replace(/^frontend\//i, "");
+  try {
+    return new URL(src, window.location.href).href;
+  } catch (_) {
+    return src;
+  }
 }
 
 function closeModal() { $("orderModal").classList.remove("show"); }
