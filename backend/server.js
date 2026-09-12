@@ -542,6 +542,7 @@ async function start() {
       const order = {
         productId: product._id,
         productName: product.name,
+        productImage: product.image || product.imageUrl || "",
         price: Number(product.price || 0),
         quantity,
 
@@ -665,7 +666,9 @@ async function start() {
             category:
               product.category || "",
             price:
-              Number(product.price || 0)
+              Number(product.price || 0),
+            image:
+              product.image || product.imageUrl || ""
           },
 
           quantity,
@@ -896,6 +899,12 @@ async function start() {
             attempt.productSnapshot.name
               ? attempt.productSnapshot.name
               : product.name,
+
+          productImage:
+            attempt.productSnapshot &&
+            attempt.productSnapshot.image
+              ? attempt.productSnapshot.image
+              : (product.image || product.imageUrl || ""),
 
           price:
             Number(attempt.amount) /

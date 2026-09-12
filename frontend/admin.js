@@ -4,6 +4,7 @@ const TOKEN_KEY = "mahalakshmiAdminToken";
 let adminToken = sessionStorage.getItem(TOKEN_KEY) || "";
 let newOrders = [];
 let allOrders = [];
+let productsById = new Map();
 
 const $ = id => document.getElementById(id);
 
@@ -91,10 +92,16 @@ async function safeJson(r) {
 async function loadOrders() {
   setLoading();
   try {
-    [newOrders, allOrders] = await Promise.all([
+    const [todayList, allList, productList] = await Promise.all([
       api("/admin/orders/today-new"),
-      api("/admin/orders")
+      api("/admin/orders"),
+      api("/products").catch(() => [])
     ]);
+    newOrders = Array.isArray(todayList) ? todayList : [];
+    allOrders = Array.isArray(allList) ? allList : [];
+    productsById = new Map(
+      (Array.isArray(productList) ? productList : []).map(p => [String(p._id || ""), p])
+    );
     $("newCount").textContent = newOrders.length;
     $("allCount").textContent = allOrders.length;
     renderOrders($("newOrdersBox"), newOrders, true);
@@ -126,10 +133,14 @@ function renderOrders(box, orders, isNewList) {
   const rows = orders.map(o => {
     const total = Number(o.amountPaid ?? (Number(o.price || 0) * Number(o.quantity || 1)));
     const status = o.adminSeen === true ? '<span class="seen-pill">SEEN</span>' : '<span class="new-pill">NEW</span>';
+    const image = productImageFor(o);
+    const productHtml = image
+      ? `<div class="product-cell"><img class="product-thumb" src="${esc(image)}" alt=""><span>${esc(o.productName || "-")}</span></div>`
+      : `<div class="product-cell"><div class="product-placeholder">IMG</div><span>${esc(o.productName || "-")}</span></div>`;
     return `<tr>
       <td><div class="order-id">${esc(shortId(o._id))}</div><div style="margin-top:5px">${status}</div></td>
       <td><b>${esc(o.customerName || "-")}</b><br><span class="muted">${esc(o.phone || "-")}</span></td>
-      <td>${esc(o.productName || "-")}</td>
+      <td>${productHtml}</td>
       <td class="price">₹${money(total)}</td>
       <td><span class="pay-pill">${esc(o.paymentMethod || "-")}</span><br><small>${esc(o.paymentStatus || "")}</small></td>
       <td>${esc(formatDate(o.createdAt))}</td>
@@ -171,7 +182,11 @@ async function openOrder(id, fromNew) {
 function showOrderDetails(o) {
   const total = Number(o.amountPaid ?? (Number(o.price || 0) * Number(o.quantity || 1)));
   const fullAddress = [o.doorNo, o.areaVillage, o.city, o.state, o.pincode].filter(Boolean).join(", ") || o.address || "-";
-  $("orderDetails").innerHTML = `<div class="details">
+  const image = productImageFor(o);
+  const imageBlock = image
+    ? `<div class="order-image-wrap"><img class="order-image" src="${esc(image)}" alt="${esc(o.productName || "Product")}"></div>`
+    : "";
+  $("orderDetails").innerHTML = `${imageBlock}<div class="details">
     ${detail("Order ID", String(o._id || "-"))}
     ${detail("Booked At", formatDate(o.createdAt))}
     ${detail("Customer", o.customerName || "-")}
@@ -191,6 +206,13 @@ function showOrderDetails(o) {
 
 function detail(label, value, full = false) {
   return `<div class="detail${full ? " full" : ""}"><b>${esc(label)}</b><span>${esc(value)}</span></div>`;
+}
+
+function productImageFor(order) {
+  const direct = String(order.productImage || order.image || order.imageUrl || "").trim();
+  if (direct) return direct;
+  const product = productsById.get(String(order.productId || ""));
+  return product ? String(product.image || product.imageUrl || "").trim() : "";
 }
 
 function closeModal() { $("orderModal").classList.remove("show"); }
