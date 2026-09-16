@@ -380,6 +380,7 @@ async function start() {
   console.log("MongoDB connected");
 
   const db = client.db(DB_NAME);
+  const attachLifecycle = require("./server-lifecycle").installLifecycle(app, db, client);
 
   const products = db.collection(
     "sarees and fancy items"
@@ -1678,7 +1679,7 @@ async function start() {
   const port =
     process.env.PORT || 5003;
 
-  app.listen(port, () => {
+  const server = app.listen(port, "0.0.0.0", () => {
     console.log(
       "Server running on port " +
       port
@@ -1694,6 +1695,7 @@ async function start() {
       emailOtpConfigured
     );
   });
+  attachLifecycle(server);
 }
 
 start().catch(e => {
