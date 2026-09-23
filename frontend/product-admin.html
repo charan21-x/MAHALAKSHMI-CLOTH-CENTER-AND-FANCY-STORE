@@ -7,7 +7,7 @@
 <form id="productForm" class="store-form"><input id="productId" type="hidden">
 <label>Name<input id="name" required maxlength="150"></label><label>Category<input id="category" maxlength="80" placeholder="Sarees, jewellery, accessories"></label>
 <label>Price (₹)<input id="price" type="number" min="0" max="10000000" step="0.01" required></label><label>Stock quantity<input id="stock" type="number" min="0" max="1000000" step="1" required></label>
-<label class="wide">Product photos<input id="imageFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple><small>Select up to 10 photos from your phone or computer. The first photo becomes the cover. When editing, leave this empty to keep the existing photos.</small></label>
+<label class="wide">Product photos<input id="imageFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple><small>Upload up to 10 photos. You can select many together OR choose them one-by-one. The first photo is shown on the home page; opening the product shows all photos.</small></label>
 <div id="imagePreview" class="store-thumbs wide" aria-label="Image previews"></div>
 <label class="wide">Full description<textarea id="description" rows="6" maxlength="10000"></textarea></label>
 <label class="wide">Product details &amp; care<textarea id="details" rows="4" maxlength="6000" placeholder="Material, size, colour, dimensions and care instructions"></textarea></label>

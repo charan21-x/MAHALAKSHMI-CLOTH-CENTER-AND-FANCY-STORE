@@ -70,20 +70,37 @@
     clearPreviewObjectUrls();
     $('imagePreview').replaceChildren();
 
-    const sources = selectedFiles.length
-      ? selectedFiles.map(file => {
-          const url = URL.createObjectURL(file);
-          previewObjectUrls.push(url);
-          return url;
-        })
-      : existingImages;
+    const sources = [
+      ...existingImages.map(url => ({ url, local: false })),
+      ...selectedFiles.map(file => {
+        const url = URL.createObjectURL(file);
+        previewObjectUrls.push(url);
+        return { url, local: true };
+      })
+    ].slice(0, 10);
 
-    sources.slice(0, 10).forEach((url, i) => {
+    sources.forEach((item, i) => {
+      const wrap = document.createElement('div');
+      wrap.style.position = 'relative';
+
       const img = document.createElement('img');
-      img.src = url;
+      img.src = item.url;
       img.alt = 'Product photo ' + (i + 1);
       img.loading = 'lazy';
-      $('imagePreview').append(img);
+      wrap.append(img);
+
+      if (i === 0) {
+        const badge = document.createElement('span');
+        badge.textContent = 'HOME COVER';
+        Object.assign(badge.style, {
+          position: 'absolute', left: '6px', bottom: '6px',
+          background: 'rgba(0,0,0,.72)', color: '#fff',
+          padding: '3px 6px', borderRadius: '5px', fontSize: '10px'
+        });
+        wrap.append(badge);
+      }
+
+      $('imagePreview').append(wrap);
     });
   }
 
@@ -258,27 +275,40 @@
   $('imageFiles').onchange = () => {
     const files = Array.from($('imageFiles').files || []);
 
-    if (files.length > 10) {
-      $('imageFiles').value = '';
-      selectedFiles = [];
-      previews();
-      return message('Select maximum 10 photos.');
-    }
-
     const bad = files.find(file =>
       !['image/jpeg','image/png','image/webp'].includes(file.type)
     );
 
     if (bad) {
       $('imageFiles').value = '';
-      selectedFiles = [];
-      previews();
       return message('Only JPG, PNG and WEBP photos are supported.');
     }
 
-    selectedFiles = files;
+    // Add new selections instead of replacing earlier selections.
+    // This lets you choose photos one-by-one or many at once.
+    const seen = new Set(
+      selectedFiles.map(file => `${file.name}|${file.size}|${file.lastModified}`)
+    );
+
+    for (const file of files) {
+      const key = `${file.name}|${file.size}|${file.lastModified}`;
+      if (!seen.has(key)) {
+        selectedFiles.push(file);
+        seen.add(key);
+      }
+    }
+
+    const total = existingImages.length + selectedFiles.length;
+    if (total > 10) {
+      selectedFiles = selectedFiles.slice(0, Math.max(0, 10 - existingImages.length));
+      $('imageFiles').value = '';
+      previews();
+      return message('Maximum 10 product photos. Extra photos were not added.');
+    }
+
+    $('imageFiles').value = '';
     previews();
-    message(files.length ? `${files.length} photo(s) selected.` : '');
+    message(total ? `${total} photo(s) ready. First photo is the home-page cover.` : '');
   };
 
   $('cancelEdit').onclick = reset;
@@ -355,10 +385,11 @@
       let images = existingImages.slice(0, 10);
 
       if (selectedFiles.length) {
-        images = [];
+        const newImages = [];
         for (let i = 0; i < selectedFiles.length; i += 1) {
-          images.push(await uploadImage(selectedFiles[i], i + 1, selectedFiles.length));
+          newImages.push(await uploadImage(selectedFiles[i], i + 1, selectedFiles.length));
         }
+        images = [...images, ...newImages].slice(0, 10);
       }
 
       Object.assign(data, {
