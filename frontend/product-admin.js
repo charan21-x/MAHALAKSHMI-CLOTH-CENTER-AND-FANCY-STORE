@@ -82,12 +82,41 @@
     sources.forEach((item, i) => {
       const wrap = document.createElement('div');
       wrap.style.position = 'relative';
+      wrap.style.display = 'inline-block';
 
       const img = document.createElement('img');
       img.src = item.url;
       img.alt = 'Product photo ' + (i + 1);
       img.loading = 'lazy';
       wrap.append(img);
+
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.textContent = '×';
+      remove.title = 'Remove this photo';
+      remove.setAttribute('aria-label', 'Remove product photo ' + (i + 1));
+      Object.assign(remove.style, {
+        position: 'absolute', top: '5px', right: '5px',
+        width: '28px', height: '28px', borderRadius: '50%',
+        border: '0', background: 'rgba(190, 25, 25, .92)', color: '#fff',
+        fontSize: '20px', lineHeight: '26px', cursor: 'pointer',
+        boxShadow: '0 2px 6px rgba(0,0,0,.25)'
+      });
+
+      remove.onclick = () => {
+        if (i < existingImages.length) {
+          existingImages.splice(i, 1);
+        } else {
+          selectedFiles.splice(i - existingImages.length, 1);
+        }
+
+        previews();
+        const total = existingImages.length + selectedFiles.length;
+        message(total
+          ? `${total} photo(s) ready. First photo is the home-page cover.`
+          : 'No photos selected.');
+      };
+      wrap.append(remove);
 
       if (i === 0) {
         const badge = document.createElement('span');
