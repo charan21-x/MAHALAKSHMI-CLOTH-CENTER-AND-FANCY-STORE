@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Your cart | Mahalakshmi</title>
+  <link rel="stylesheet" href="storefront.css?v=1">
+  <script src="store-config.js?v=1" defer></script>
+  <script src="storefront.js?v=1" defer></script>
+</head>
+<body data-page="cart">
+  <a class="skip-link" href="#main">Skip to cart</a>
+  <header id="storeHeader" class="store-header"></header>
+  <main id="main" class="store-main cart-main">
+    <nav class="breadcrumb" aria-label="Breadcrumb"><a href="index.html">Home</a><span aria-hidden="true">/</span><span>Your cart</span></nav>
+    <div class="section-heading"><h1>Your cart</h1><a href="index.html">Continue shopping →</a></div>
+    <p class="muted">Choose an item to buy. Each item has its own checkout.</p>
+    <div id="loadStatus" class="load-status" role="status" aria-live="polite"></div>
+    <div id="cartItems" aria-busy="true"><div class="detail-loading">Loading your cart…</div></div>
+  </main>
+  <footer class="store-footer"><span data-store-name>MAHALAKSHMI</span><span>Cloth Center & Fancy Store</span><a href="orders.html">My Orders →</a></footer>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <noscript><p class="empty-state">Please enable JavaScript to view your cart.</p></noscript>
+</body>
+</html>
