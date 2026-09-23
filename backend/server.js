@@ -251,28 +251,54 @@ function orderOwnerFilter(email, extra = {}) {
   };
 }
 
+function optionalNonNegativeNumber(value) {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
 function normalizeProduct(body) {
   const stock = Math.max(
     0,
     Math.floor(Number(body.stock || 0))
   );
 
-  const image = String(
+  const suppliedImages = Array.isArray(body.images)
+    ? body.images
+        .map(value => String(value || "").trim())
+        .filter(value => /^https?:\/\//i.test(value))
+        .slice(0, 10)
+    : [];
+
+  const fallbackImage = String(
     body.image ||
     body.imageUrl ||
     ""
   ).trim();
+
+  const images = suppliedImages.length
+    ? suppliedImages
+    : (/^https?:\/\//i.test(fallbackImage) ? [fallbackImage] : []);
+
+  const image = images[0] || "";
 
   return {
     name: String(body.name || "").trim(),
     category: String(body.category || "").trim(),
     price: Math.max(0, Number(body.price || 0)),
     stock,
+    images,
     image,
     imageUrl: image,
-    description: String(
-      body.description || ""
-    ).trim(),
+    description: String(body.description || "").trim(),
+    details: String(body.details || "").trim(),
+    deliveryMinDays: optionalNonNegativeNumber(body.deliveryMinDays),
+    deliveryMaxDays: optionalNonNegativeNumber(body.deliveryMaxDays),
+    returnDays: optionalNonNegativeNumber(body.returnDays),
+    returnPolicy: String(body.returnPolicy || "").trim(),
     isActive: body.isActive !== false,
     inStock:
       stock > 0 &&
@@ -386,6 +412,9 @@ async function start() {
     "sarees and fancy items"
   );
 
+  // Product photos are stored in MongoDB so uploads survive Render restarts.
+  const productImages = db.collection("product_images");
+
   const orders = db.collection("orders");
 
   // Payment attempts are NOT customer orders.
@@ -401,6 +430,7 @@ async function start() {
   await Promise.all([
     products.createIndex({ category: 1 }),
     products.createIndex({ name: 1 }),
+    productImages.createIndex({ createdAt: -1 }),
 
     orders.createIndex({
       phoneNormalized: 1,
@@ -450,6 +480,102 @@ async function start() {
   });
 
   // ---------------------------------
+  // PRODUCT IMAGE UPLOADS
+  // ---------------------------------
+  // Admin sends one compressed JPG/PNG/WEBP image at a time.
+  // The binary is stored in MongoDB, not Render's temporary filesystem.
+
+  app.post(
+    "/admin/product-images",
+    requireAdmin,
+    express.raw({
+      type: ["image/jpeg", "image/png", "image/webp"],
+      limit: "3mb"
+    }),
+    async (req, res) => {
+      try {
+        if (!Buffer.isBuffer(req.body) || !req.body.length) {
+          return res.status(400).json({
+            message: "Choose a JPG, PNG or WEBP image"
+          });
+        }
+
+        const contentType = String(req.get("content-type") || "").split(";")[0];
+        const allowedTypes = new Set([
+          "image/jpeg",
+          "image/png",
+          "image/webp"
+        ]);
+
+        if (!allowedTypes.has(contentType)) {
+          return res.status(415).json({
+            message: "Only JPG, PNG and WEBP images are supported"
+          });
+        }
+
+        let originalName = "product-image";
+        try {
+          originalName = decodeURIComponent(
+            String(req.get("x-file-name") || originalName)
+          ).slice(0, 180);
+        } catch (_) {
+          // Keep the safe fallback name.
+        }
+
+        const result = await productImages.insertOne({
+          data: req.body,
+          contentType,
+          originalName,
+          size: req.body.length,
+          createdAt: new Date()
+        });
+
+        res.status(201).json({
+          acknowledged: true,
+          id: String(result.insertedId),
+          url: `/product-images/${result.insertedId}`
+        });
+      } catch (e) {
+        console.error("Product image upload error:", e);
+        res.status(500).json({
+          message: "Could not upload product image"
+        });
+      }
+    }
+  );
+
+  app.get("/product-images/:id", async (req, res) => {
+    try {
+      if (!ObjectId.isValid(req.params.id)) {
+        return res.status(404).end();
+      }
+
+      const doc = await productImages.findOne({
+        _id: new ObjectId(req.params.id)
+      });
+
+      if (!doc || !doc.data) {
+        return res.status(404).end();
+      }
+
+      const bytes = Buffer.isBuffer(doc.data)
+        ? doc.data
+        : (doc.data.buffer ? Buffer.from(doc.data.buffer) : null);
+
+      if (!bytes) {
+        return res.status(404).end();
+      }
+
+      res.set("Content-Type", doc.contentType || "image/webp");
+      res.set("Cache-Control", "public, max-age=31536000, immutable");
+      res.send(bytes);
+    } catch (e) {
+      console.error("Product image load error:", e);
+      res.status(500).end();
+    }
+  });
+
+  // ---------------------------------
   // PUBLIC PRODUCTS
   // ---------------------------------
 
@@ -473,6 +599,13 @@ async function start() {
               stock: 1,
               image: 1,
               imageUrl: 1,
+              images: 1,
+              description: 1,
+              details: 1,
+              deliveryMinDays: 1,
+              deliveryMaxDays: 1,
+              returnDays: 1,
+              returnPolicy: 1,
               inStock: 1
             }
           }
