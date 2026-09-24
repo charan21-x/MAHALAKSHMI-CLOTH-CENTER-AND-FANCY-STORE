@@ -1,0 +1,31 @@
+/* Keep the gold lotus legible at small header sizes. */
+.brand-mark.lotus-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 48px;
+  padding: 3px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #111a29;
+  overflow: hidden;
+}
+.brand-mark .brand-lotus, .banner-mark .brand-lotus {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: none;
+}
+.banner-mark.lotus-banner-mark {
+  width: 260px;
+  height: 210px;
+  top: -6px;
+  right: -20px;
+  opacity: .24;
+  transform: rotate(-8deg);
+}
+@media (max-width: 760px) {
+  .brand-mark.lotus-brand-mark { width: 43px; height: 36px; padding: 2px; border-radius: 8px; }
+  .banner-mark.lotus-banner-mark { width: 175px; height: 140px; right: -28px; top: 10px; }
+}
