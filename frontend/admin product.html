@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Manage products | Mahalakshmi Store</title><link rel="stylesheet" href="store-products.css"><script src="product-admin.js?v=delivery-1" defer></script></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Manage products | Mahalakshmi Store</title><link rel="stylesheet" href="store-products.css"><script src="product-admin.js" defer></script></head><body>
 <header class="store-header"><a class="store-brand" href="index.html">MAHALAKSHMI STORE</a><span>Product management</span></header><main class="store-shell">
 <section id="loginPanel" class="store-panel"><h1>Admin login</h1><form id="loginForm" class="store-form"><label>Username<input id="username" required autocomplete="username"></label><label>Password<input id="password" type="password" required autocomplete="current-password"></label><button class="store-button" id="loginButton">Sign in</button></form></section>
 <p id="message" class="store-message" role="status" aria-live="polite"></p>
@@ -7,7 +7,8 @@
 <form id="productForm" class="store-form"><input id="productId" type="hidden">
 <label>Name<input id="name" required maxlength="150"></label><label>Category<input id="category" maxlength="80" placeholder="Sarees, jewellery, accessories"></label>
 <label>Price (₹)<input id="price" type="number" min="0" max="10000000" step="0.01" required></label><label>Stock quantity<input id="stock" type="number" min="0" max="1000000" step="1" required></label>
-<label class="wide">Product photos — one image URL per line<textarea id="images" rows="4" placeholder="https://your-image-host.com/front.jpg&#10;https://your-image-host.com/back.jpg"></textarea><small>Up to 10 HTTP/HTTPS image links. The first photo is the cover.</small></label>
+<label class="wide">Product photos — choose files<input id="imageFiles" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple><small>Select up to 10 JPG, PNG or WEBP images. You can choose several files at once.</small></label>
+<label class="wide">Or select an entire image folder<input id="imageFolder" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" webkitdirectory directory multiple><small>Click Choose Files and select the folder that contains the product photos. Images inside that folder will be selected automatically. Only JPG, PNG and WEBP images are used.</small></label>
 <div id="imagePreview" class="store-thumbs wide" aria-label="Image previews"></div>
 <label class="wide">Full description<textarea id="description" rows="6" maxlength="10000"></textarea></label>
 <label class="wide">Product details &amp; care<textarea id="details" rows="4" maxlength="6000" placeholder="Material, size, colour, dimensions and care instructions"></textarea></label>

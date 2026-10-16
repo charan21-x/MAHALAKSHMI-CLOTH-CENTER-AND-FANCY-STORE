@@ -11,7 +11,7 @@
   let previewObjectUrls = [];
 
   const fields = [
-    'name','category','price','deliveryCharge','stock','description','details',
+    'name','category','price','stock','description','details',
     'deliveryMinDays','deliveryMaxDays','returnDays','returnPolicy'
   ];
 
@@ -142,6 +142,7 @@
     selectedFiles = [];
     existingImages = [];
     $('imageFiles').value = '';
+    if ($('imageFolder')) $('imageFolder').value = '';
     previews();
   }
 
@@ -156,7 +157,7 @@
       return `<tr>
         <td>${validURL(cover) ? `<img src="${escape(cover)}" alt="${escape(p.name)}" loading="lazy">` : 'No photo'}</td>
         <td>${escape(p.name)}<br><small>${escape(p.category)}</small></td>
-        <td>₹${Number(p.price).toLocaleString('en-IN')}<br><small>Delivery: ${Number(p.deliveryCharge||0) ? '₹'+Number(p.deliveryCharge).toLocaleString('en-IN') : 'FREE'}</small></td>
+        <td>₹${Number(p.price).toLocaleString('en-IN')}</td>
         <td>${Number(p.stock) || 0}</td>
         <td>${p.isActive === false ? 'Hidden' : 'Visible'}</td>
         <td>
@@ -301,25 +302,26 @@
     message('Logged out.');
   };
 
-  $('imageFiles').onchange = () => {
-    const files = Array.from($('imageFiles').files || []);
+  function addSelectedImages(fileList, sourceLabel) {
+    const allFiles = Array.from(fileList || []);
+    // Folder selection can include non-image files; silently skip those.
+    const imageFiles = allFiles.filter(file => {
+      const type = String(file.type || '').toLowerCase();
+      const name = String(file.name || '').toLowerCase();
+      return ['image/jpeg','image/png','image/webp'].includes(type) ||
+        /\.(jpe?g|png|webp)$/.test(name);
+    });
 
-    const bad = files.find(file =>
-      !['image/jpeg','image/png','image/webp'].includes(file.type)
-    );
-
-    if (bad) {
-      $('imageFiles').value = '';
-      return message('Only JPG, PNG and WEBP photos are supported.');
+    if (!imageFiles.length) {
+      message('No JPG, PNG or WEBP images found. Select image files or a folder containing images.');
+      return;
     }
 
-    // Add new selections instead of replacing earlier selections.
-    // This lets you choose photos one-by-one or many at once.
     const seen = new Set(
       selectedFiles.map(file => `${file.name}|${file.size}|${file.lastModified}`)
     );
 
-    for (const file of files) {
+    for (const file of imageFiles) {
       const key = `${file.name}|${file.size}|${file.lastModified}`;
       if (!seen.has(key)) {
         selectedFiles.push(file);
@@ -330,15 +332,28 @@
     const total = existingImages.length + selectedFiles.length;
     if (total > 10) {
       selectedFiles = selectedFiles.slice(0, Math.max(0, 10 - existingImages.length));
-      $('imageFiles').value = '';
+      if ($('imageFiles')) $('imageFiles').value = '';
+      if ($('imageFolder')) $('imageFolder').value = '';
       previews();
-      return message('Maximum 10 product photos. Extra photos were not added.');
+      return message('Maximum 10 product photos. Only the first 10 photos are kept.');
     }
 
-    $('imageFiles').value = '';
+    if ($('imageFiles')) $('imageFiles').value = '';
+    if ($('imageFolder')) $('imageFolder').value = '';
     previews();
-    message(total ? `${total} photo(s) ready. First photo is the home-page cover.` : '');
+    const skipped = allFiles.length - imageFiles.length;
+    message(`${total} photo(s) ready${sourceLabel ? ' from ' + sourceLabel : ''}. First photo is the home-page cover.${skipped ? ` Skipped ${skipped} non-image/unsupported file(s).` : ''}`);
+  }
+
+  $('imageFiles').onchange = () => {
+    addSelectedImages($('imageFiles').files, 'selected files');
   };
+
+  if ($('imageFolder')) {
+    $('imageFolder').onchange = () => {
+      addSelectedImages($('imageFolder').files, 'selected folder');
+    };
+  }
 
   $('cancelEdit').onclick = reset;
   $('search').oninput = render;
@@ -364,6 +379,7 @@
         : [p.image || p.imageUrl].filter(validURL);
       selectedFiles = [];
       $('imageFiles').value = '';
+      if ($('imageFolder')) $('imageFolder').value = '';
       $('isActive').checked = p.isActive !== false;
       $('formTitle').textContent = 'Edit product';
       $('saveProduct').textContent = 'Save changes';
@@ -397,7 +413,7 @@
       fields.map(key => [key, $(key).value.trim()])
     );
 
-    ['price','deliveryCharge','stock','returnDays','deliveryMinDays','deliveryMaxDays'].forEach(key => {
+    ['price','stock','returnDays','deliveryMinDays','deliveryMaxDays'].forEach(key => {
       data[key] = data[key] === '' ? null : Number(data[key]);
     });
 
