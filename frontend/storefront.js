@@ -116,7 +116,7 @@
     return `<p class="price-line${detail ? ' detail-price' : ''}"><strong>${money(price)}</strong>${hasDiscount ? `<del>${money(original)}</del><span class="discount">${Math.round((1 - price / original) * 100)}% off</span>` : ''}</p>`;
   }
   function card(p, index) {
-    return `<a class="product-card" href="${productLink(p)}" aria-label="View ${esc(p.name || 'product')} details"><div class="product-media">${media(p,index)}${!sellable(p) ? '<span class="stock-tag">'+ (validPrice(p) ? 'Out of stock' : 'Currently unavailable') +'</span>' : ''}</div><p class="product-category">${esc(p.category || 'Collection')}</p><h3 class="product-name">${esc(p.name || 'Product')}</h3>${priceHtml(p)}</a>`;
+    return `<a class="product-card" href="${productLink(p)}" aria-label="View ${esc(p.name || 'product')} details"><div class="product-media">${media(p,index)}${!sellable(p) ? '<span class="stock-tag">'+ (validPrice(p) ? 'Out of stock' : 'Currently unavailable') +'</span>' : ''}</div><p class="product-category">${esc(p.category || 'Collection')}</p><h3 class="product-name">${esc(p.name || 'Product')}</h3>${Number(p.ratingCount)>0 ? `<p class="product-rating" aria-label="${Number(p.ratingAverage||0).toFixed(1)} out of 5 stars">★ ${Number(p.ratingAverage||0).toFixed(1)} · ${Number(p.ratingCount)} review(s)</p>` : '<p class="product-rating muted">No reviews yet</p>'}${priceHtml(p)}</a>`;
   }
   function skeletons() {
     $("productGrid").innerHTML = Array.from({length:4}, () => '<div aria-hidden="true"><div class="skeleton-media"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>').join("");
@@ -170,10 +170,25 @@
       <div class="buy-actions"><button id="addToCart" class="action-button secondary-button" type="button" ${canBuy ? '' : 'disabled'}>${icon('bag')}<span>${getCart().includes(idOf(p)) ? 'Go to cart' : 'Add to cart'}</span></button><button id="buyNow" class="action-button primary-button" type="button" ${canBuy ? '' : 'disabled'}>${!live ? 'Checking availability…' : available ? 'Buy Now · '+money(p.price) : 'Unavailable'}</button></div>
       <p class="checkout-note">Continue to delivery details, then choose your payment method.</p>
       <div class="product-facts"><h2>Product details</h2><dl>${facts.map(([k,v])=>'<dt>'+esc(k)+'</dt><dd>'+esc(v)+'</dd>').join('')}</dl></div>
-      <div class="detail-info-row">${icon('pin')}<div><strong>Delivery details</strong><p>Enter your address and pincode at checkout.</p></div></div>
+      <div class="detail-info-row">${icon('pin')}<div><strong>Delivery details</strong><p>Delivery charge: ${Number(p.deliveryCharge||0) ? money(p.deliveryCharge) : 'FREE'} · Estimated delivery: ${p.deliveryMinDays != null && p.deliveryMaxDays != null ? `${Number(p.deliveryMinDays)===Number(p.deliveryMaxDays) ? Number(p.deliveryMaxDays) : `${Number(p.deliveryMinDays)}–${Number(p.deliveryMaxDays)}`} days` : p.deliveryMaxDays != null ? `within ${Number(p.deliveryMaxDays)} days` : 'within 7 days'}.</p></div></div>
       <div class="detail-info-row">${icon('order')}<div><strong>Keep track of your order</strong><p>View your orders and their status in My Orders.</p></div></div>
-      <details class="product-questions"><summary>Shopping questions</summary><p><strong>How do I place an order?</strong><br>Select Buy Now, enter your delivery details and continue to payment.</p><p><strong>Where can I find my orders?</strong><br>Open My Orders and use your existing account sign-in.</p></details></section></div>`;
+      <details class="product-questions"><summary>Shopping questions</summary><p><strong>How do I place an order?</strong><br>Select Buy Now, enter your delivery details and continue to payment.</p><p><strong>Where can I find my orders?</strong><br>Open My Orders and use your existing account sign-in.</p></details></section></div>
+     <section class="review-panel" id="reviewsPanel" aria-labelledby="reviewsTitle">
+       <div class="section-heading"><h2 id="reviewsTitle">Customer ratings &amp; reviews</h2><span id="reviewAverage" class="product-rating">Loading reviews…</span></div>
+       <div id="reviewsList" class="reviews-list"></div>
+       <form id="reviewForm" class="review-form">
+         <h3>Write a review</h3>
+         <p class="muted">Only customers with a delivered order for this product can submit a review. <a href="orders.html">Sign in to My Orders</a> first.</p>
+         <label for="reviewRating">Your rating</label>
+         <select id="reviewRating" required><option value="">Choose stars</option><option value="5">★★★★★ — Excellent</option><option value="4">★★★★ — Good</option><option value="3">★★★ — Average</option><option value="2">★★ — Poor</option><option value="1">★ — Bad</option></select>
+         <label for="reviewComment">Your review</label><textarea id="reviewComment" rows="4" maxlength="1200" required placeholder="Share your experience with this product"></textarea>
+         <label for="reviewPhotos">Photos (up to 3 JPG/PNG/WEBP, each up to 2 MB)</label><input id="reviewPhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple>
+         <button class="action-button primary-button" id="submitReview" type="submit">Submit review</button>
+         <p id="reviewMessage" class="muted" role="status" aria-live="polite"></p>
+       </form>
+     </section>`;
     bindImages(root);
+    loadProductReviews(p);
     $("buyNow").addEventListener("click", () => checkout(idOf(p)));
     $("addToCart").addEventListener("click", () => addToCart(idOf(p)));
     $("shareProduct").addEventListener("click", shareProduct);
@@ -185,6 +200,66 @@
     $("similarSection").hidden = !similar.length;
     $("similarProducts").innerHTML = similar.map(card).join(""); bindImages($("similarProducts"));
   }
+  async function loadProductReviews(product) {
+    const box = $("reviewsList"), average = $("reviewAverage");
+    if (!box || !average) return;
+    try {
+      const response = await fetch(`${api}/products/${encodeURIComponent(idOf(product))}/reviews`);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Could not load reviews");
+      average.textContent = Number(data.ratingCount) ? `★ ${Number(data.ratingAverage).toFixed(1)} / 5 · ${data.ratingCount} review(s)` : "No reviews yet";
+      const rows = Array.isArray(data.reviews) ? data.reviews : [];
+      box.innerHTML = rows.length ? rows.map(review => {
+        const photos = (Array.isArray(review.images) ? review.images : []).map(src => {
+          const imageUrl = /^https?:\/\//i.test(src) ? src : api + src;
+          return `<img src="${esc(imageUrl)}" alt="Customer review photo" loading="lazy">`;
+        }).join("");
+        return `<article class="review-card"><div class="review-card-top"><strong>${esc(review.customerName || "Verified customer")}</strong><span class="review-stars" aria-label="${Number(review.rating)} out of 5 stars">${"★".repeat(Math.max(0,Math.min(5,Number(review.rating)||0)))}${"☆".repeat(5-Math.max(0,Math.min(5,Number(review.rating)||0)))}</span></div><p>${esc(review.comment)}</p>${photos ? `<div class="review-photos">${photos}</div>` : ""}<small class="muted">Verified purchase · ${esc(review.createdAt ? new Date(review.createdAt).toLocaleDateString("en-IN") : "")}</small></article>`;
+      }).join("") : '<p class="muted">Be the first customer to review this product after delivery.</p>';
+    } catch (error) {
+      average.textContent = "Reviews unavailable";
+      box.textContent = error.message;
+    }
+    const form = $("reviewForm");
+    if (form && !form.dataset.bound) {
+      form.dataset.bound = "1";
+      form.addEventListener("submit", async event => {
+        event.preventDefault();
+        const token = sessionStorage.getItem("customerOrderToken") || "";
+        const message = $("reviewMessage"), button = $("submitReview");
+        if (!token) { message.textContent = "Please sign in through My Orders with your email OTP first."; return; }
+        const rating = Number($("reviewRating").value), comment = $("reviewComment").value.trim();
+        const files = Array.from($("reviewPhotos").files || []);
+        if (!rating || !comment) { message.textContent = "Choose a star rating and write your review."; return; }
+        if (files.length > 3) { message.textContent = "Choose up to 3 photos."; return; }
+        if (files.some(file => !["image/jpeg","image/png","image/webp"].includes(file.type) || file.size > 2*1024*1024)) {
+          message.textContent = "Each photo must be JPG, PNG or WEBP and no larger than 2 MB."; return;
+        }
+        button.disabled = true; message.textContent = "Submitting your review…";
+        try {
+          const images = [];
+          for (const file of files) {
+            const upload = await fetch(`${api}/reviews/images`, { method: "POST", headers: { "Content-Type": file.type, "X-File-Name": encodeURIComponent(file.name), Authorization: `Bearer ${token}` }, body: file });
+            const uploaded = await upload.json();
+            if (!upload.ok || !uploaded.url) throw new Error(uploaded.message || "Review photo upload failed");
+            images.push(uploaded.url);
+          }
+          const response = await fetch(`${api}/products/${encodeURIComponent(idOf(product))}/reviews`, {
+            method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ rating, comment, images })
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.message || "Review could not be saved");
+          $("reviewForm").reset();
+          message("Thank you! Your verified review has been saved.");
+          await loadProductReviews(product);
+        } catch (error) {
+          message(error.message || "Review submission failed");
+        } finally { button.disabled = false; }
+      });
+    }
+  }
+
   async function shareProduct() {
     const url = location.href;
     try {

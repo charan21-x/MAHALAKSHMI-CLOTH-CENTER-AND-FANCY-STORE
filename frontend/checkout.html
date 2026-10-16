@@ -478,7 +478,19 @@
         const api = "https://mahalakshmi-backend-api.onrender.com";
         if (!p) {
             location.href = "index.html"
-        } else document.getElementById("product").innerHTML = `<div class="summary"><b>${esc(p.name)}</b><b>₹${Number(p.price||0).toLocaleString("en-IN")}</b></div>`;
+        } else {
+            const shipping = Math.max(0, Number(p.deliveryCharge || 0));
+            const minDays = p.deliveryMinDays == null ? null : Number(p.deliveryMinDays);
+            const maxDays = p.deliveryMaxDays == null ? null : Number(p.deliveryMaxDays);
+            const daysText = minDays != null && maxDays != null
+                ? `${minDays === maxDays ? maxDays : `${minDays}–${maxDays}`} day(s) estimated`
+                : maxDays != null ? `Within ${maxDays} day(s) estimated` : "Estimated within 7 days";
+            document.getElementById("product").innerHTML =
+                `<div class="summary"><span>${esc(p.name)} · Product price</span><b>₹${Number(p.price||0).toLocaleString("en-IN")}</b>
+                <span>Delivery charge</span><b>${shipping ? "₹"+shipping.toLocaleString("en-IN") : "FREE"}</b>
+                <span>Estimated delivery</span><b>${esc(daysText)}</b>
+                <span><strong>Total</strong></span><b>₹${(Number(p.price||0)+shipping).toLocaleString("en-IN")}</b></div>`;
+        }
 
         async function next() {
             const v = {

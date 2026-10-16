@@ -155,6 +155,58 @@ async function sendOtpEmail(email, code) {
   }
 }
 
+
+async function sendStoreEmail(email, subject, textContent) {
+  if (!emailOtpConfigured || !normalizeEmail(email)) return false;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+  try {
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        "api-key": BREVO_API_KEY
+      },
+      body: JSON.stringify({
+        sender: { name: BREVO_SENDER_NAME, email: BREVO_SENDER_EMAIL },
+        to: [{ email: normalizeEmail(email) }],
+        subject,
+        textContent
+      }),
+      signal: controller.signal
+    });
+    if (!response.ok) {
+      const detail = await response.text();
+      throw new Error(`Brevo HTTP ${response.status}: ${detail.slice(0, 180)}`);
+    }
+    return true;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function addCalendarDays(date, days) {
+  const result = new Date(date);
+  result.setDate(result.getDate() + Math.max(0, Number(days) || 0));
+  return result;
+}
+
+function deliveryDateFor(product, from = new Date()) {
+  const hasMax = product.deliveryMaxDays !== null && product.deliveryMaxDays !== undefined && product.deliveryMaxDays !== "";
+  const hasMin = product.deliveryMinDays !== null && product.deliveryMinDays !== undefined && product.deliveryMinDays !== "";
+  const days = hasMax && Number.isFinite(Number(product.deliveryMaxDays))
+    ? Number(product.deliveryMaxDays)
+    : hasMin && Number.isFinite(Number(product.deliveryMinDays))
+      ? Number(product.deliveryMinDays)
+      : 7;
+  return addCalendarDays(from, days);
+}
+
+function moneyText(value) {
+  return `₹${Number(value || 0).toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+}
+
 function normalizePhone(value) {
   const digits = String(value || "").replace(/\D/g, "");
   const local = digits.length > 10
@@ -289,6 +341,7 @@ function normalizeProduct(body) {
     name: String(body.name || "").trim(),
     category: String(body.category || "").trim(),
     price: Math.max(0, Number(body.price || 0)),
+    deliveryCharge: optionalNonNegativeNumber(body.deliveryCharge) ?? 0,
     stock,
     images,
     image,
@@ -416,6 +469,7 @@ async function start() {
   const productImages = db.collection("product_images");
 
   const orders = db.collection("orders");
+  const reviews = db.collection("product_reviews");
 
   // Payment attempts are NOT customer orders.
   // Failed/cancelled online payments stay here
@@ -431,6 +485,7 @@ async function start() {
     products.createIndex({ category: 1 }),
     products.createIndex({ name: 1 }),
     productImages.createIndex({ createdAt: -1 }),
+    reviews.createIndex({ productId: 1, createdAt: -1 }),
 
     orders.createIndex({
       phoneNormalized: 1,
@@ -596,6 +651,7 @@ async function start() {
               name: 1,
               category: 1,
               price: 1,
+              deliveryCharge: 1,
               stock: 1,
               image: 1,
               imageUrl: 1,
@@ -612,7 +668,21 @@ async function start() {
         )
         .toArray();
 
-      res.json(list);
+      const ratingRows = await reviews.aggregate([
+        { $group: { _id: "$productId", ratingAverage: { $avg: "$rating" }, ratingCount: { $sum: 1 } } }
+      ]).toArray();
+      const ratingByProduct = new Map(ratingRows.map(row => [String(row._id), {
+        ratingAverage: Math.round(Number(row.ratingAverage || 0) * 10) / 10,
+        ratingCount: Number(row.ratingCount || 0)
+      }]));
+      const enriched = list.map(item => ({
+        ...item,
+        ...(ratingByProduct.get(String(item._id)) || {
+          ratingAverage: Number(item.ratingAverage ?? item.rating ?? 0),
+          ratingCount: Number(item.ratingCount || 0)
+        })
+      }));
+      res.json(enriched);
     } catch (e) {
       res.status(500).json({
         message:
@@ -680,7 +750,14 @@ async function start() {
         productName: product.name,
         productImage: product.image || product.imageUrl || "",
         price: Number(product.price || 0),
+        deliveryCharge: Number(product.deliveryCharge || 0),
+        totalAmount: Number(product.price || 0) + Number(product.deliveryCharge || 0),
         quantity,
+        deliveryMinDays: product.deliveryMinDays ?? null,
+        deliveryMaxDays: product.deliveryMaxDays ?? null,
+        expectedDeliveryDate: deliveryDateFor(product),
+        deliveryStatus: "Order placed",
+        deliveryHistory: [{ status: "Order placed", at: new Date(), note: "Order received" }],
 
         ...buildCustomerFields(
           x,
@@ -764,11 +841,9 @@ async function start() {
 
         const quantity = 1;
 
-        const amount = Math.round(
-          Number(product.price || 0) *
-          100 *
-          quantity
-        );
+        const deliveryCharge = Number(product.deliveryCharge || 0);
+        const subtotal = Number(product.price || 0) * quantity;
+        const amount = Math.round((subtotal + deliveryCharge) * 100);
 
         if (
           !Number.isInteger(amount) ||
@@ -803,6 +878,9 @@ async function start() {
               product.category || "",
             price:
               Number(product.price || 0),
+            deliveryCharge,
+            deliveryMinDays: product.deliveryMinDays ?? null,
+            deliveryMaxDays: product.deliveryMaxDays ?? null,
             image:
               product.image || product.imageUrl || ""
           },
@@ -1044,15 +1122,14 @@ async function start() {
               ? attempt.productSnapshot.image
               : "",
 
-          price:
-            Number(attempt.amount) /
-            100 /
-            Math.max(
-              1,
-              Number(
-                attempt.quantity || 1
-              )
-            ),
+          price: Number((attempt.productSnapshot && attempt.productSnapshot.price) || product.price || 0),
+          deliveryCharge: Number((attempt.productSnapshot && attempt.productSnapshot.deliveryCharge) || 0),
+          totalAmount: Number(attempt.amount) / 100,
+          deliveryMinDays: attempt.productSnapshot ? (attempt.productSnapshot.deliveryMinDays ?? null) : (product.deliveryMinDays ?? null),
+          deliveryMaxDays: attempt.productSnapshot ? (attempt.productSnapshot.deliveryMaxDays ?? null) : (product.deliveryMaxDays ?? null),
+          expectedDeliveryDate: deliveryDateFor(attempt.productSnapshot || product),
+          deliveryStatus: "Order placed",
+          deliveryHistory: [{ status: "Order placed", at: new Date(), note: "Order received" }],
 
           quantity:
             Math.max(
@@ -1418,6 +1495,76 @@ async function start() {
     }
   );
 
+  // Customer product reviews: only a verified customer with a delivered order
+  // for this product may submit one review.
+  app.get("/products/:id/reviews", async (req, res) => {
+    try {
+      if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ message: "Invalid product ID" });
+      const list = await reviews.find({ productId: new ObjectId(req.params.id) })
+        .sort({ createdAt: -1 }).limit(100).toArray();
+      const average = list.length ? list.reduce((sum, r) => sum + Number(r.rating || 0), 0) / list.length : 0;
+      res.json({ reviews: list, ratingAverage: Math.round(average * 10) / 10, ratingCount: list.length });
+    } catch (e) {
+      res.status(500).json({ message: "Unable to load reviews" });
+    }
+  });
+
+  app.post("/reviews/images", requireCustomer, express.raw({
+    type: ["image/jpeg", "image/png", "image/webp"], limit: "2mb"
+  }), async (req, res) => {
+    try {
+      if (!Buffer.isBuffer(req.body) || !req.body.length) {
+        return res.status(400).json({ message: "Choose a JPG, PNG or WEBP image" });
+      }
+      const contentType = String(req.get("content-type") || "").split(";")[0];
+      if (!["image/jpeg", "image/png", "image/webp"].includes(contentType)) {
+        return res.status(415).json({ message: "Only JPG, PNG and WEBP images are supported" });
+      }
+      const result = await productImages.insertOne({
+        data: req.body, contentType, originalName: "customer-review-image",
+        size: req.body.length, createdAt: new Date(), purpose: "review"
+      });
+      res.status(201).json({ url: `/product-images/${result.insertedId}` });
+    } catch (e) {
+      res.status(500).json({ message: "Could not upload review image" });
+    }
+  });
+
+  app.post("/products/:id/reviews", requireCustomer, async (req, res) => {
+    try {
+      if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ message: "Invalid product ID" });
+      const productId = new ObjectId(req.params.id);
+      const rating = Number(req.body && req.body.rating);
+      const comment = String(req.body && req.body.comment || "").trim();
+      const imageUrls = Array.isArray(req.body && req.body.images) ? req.body.images.slice(0, 3) : [];
+      if (!Number.isInteger(rating) || rating < 1 || rating > 5) return res.status(400).json({ message: "Choose a rating from 1 to 5 stars" });
+      if (!comment || comment.length > 1200) return res.status(400).json({ message: "Write a review (up to 1200 characters)" });
+      if (imageUrls.some(url => typeof url !== "string" || !url.startsWith("/product-images/"))) return res.status(400).json({ message: "Invalid review photo" });
+      const purchased = await orders.findOne({
+        ...orderOwnerFilter(req.customer.email),
+        productId,
+        orderStatus: { $in: ["Delivered", "delivered"] }
+      });
+      if (!purchased) return res.status(403).json({ message: "You can review this product after an order is marked Delivered. Sign in with the email used for the order." });
+      const existing = await reviews.findOne({ productId, emailNormalized: req.customer.email });
+      const review = {
+        productId, emailNormalized: req.customer.email,
+        customerName: String(purchased.customerName || "Verified customer").slice(0, 100),
+        rating, comment, images: imageUrls,
+        verifiedPurchase: true, createdAt: new Date(), updatedAt: new Date()
+      };
+      if (existing) {
+        await reviews.updateOne({ _id: existing._id }, { $set: { ...review, createdAt: existing.createdAt || new Date() } });
+        return res.json({ acknowledged: true, updated: true });
+      }
+      await reviews.insertOne(review);
+      res.status(201).json({ acknowledged: true });
+    } catch (e) {
+      console.error("Review submission error:", e.message);
+      res.status(500).json({ message: "Unable to submit review" });
+    }
+  });
+
   // ---------------------------------
   // ADMIN
   // ---------------------------------
@@ -1571,6 +1718,65 @@ async function start() {
       }
     }
   );
+
+  app.patch("/admin/orders/:id/delivery", requireAdmin, async (req, res) => {
+    try {
+      if (!ObjectId.isValid(req.params.id)) return res.status(400).json({ message: "Invalid order ID" });
+      const orderId = new ObjectId(req.params.id);
+      const current = await orders.findOne({ _id: orderId });
+      if (!current) return res.status(404).json({ message: "Order not found" });
+      const allowed = new Set(["Order placed", "Processing", "Packed", "Shipped", "Out for delivery", "Delivered", "Delivery delayed", "Cancelled"]);
+      const status = String(req.body && req.body.deliveryStatus || "").trim();
+      if (!allowed.has(status)) return res.status(400).json({ message: "Choose a valid delivery status" });
+      const rawExpected = String(req.body && req.body.expectedDeliveryDate || "").trim();
+      let expected = current.expectedDeliveryDate || null;
+      if (rawExpected) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(rawExpected)) return res.status(400).json({ message: "Expected date must be YYYY-MM-DD" });
+        const parsed = new Date(`${rawExpected}T12:00:00.000Z`);
+        if (!Number.isFinite(parsed.getTime())) return res.status(400).json({ message: "Invalid expected delivery date" });
+        expected = parsed;
+      }
+      const note = String(req.body && req.body.note || "").trim().slice(0, 300);
+      const dateKey = value => value ? new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit"
+      }).format(new Date(value)) : "";
+      const changed = status !== String(current.deliveryStatus || current.orderStatus || "Order placed") ||
+        dateKey(expected) !== dateKey(current.expectedDeliveryDate);
+      const now = new Date();
+      const set = {
+        deliveryStatus: status,
+        orderStatus: status,
+        expectedDeliveryDate: expected,
+        updatedAt: now
+      };
+      if (status === "Delivered") set.actualDeliveryDate = current.actualDeliveryDate || now;
+      const history = [...(Array.isArray(current.deliveryHistory) ? current.deliveryHistory : [])];
+      if (changed || note) history.push({ status, at: now, note });
+      set.deliveryHistory = history.slice(-50);
+      await orders.updateOne({ _id: orderId }, { $set: set });
+      let emailSent = false;
+      if (changed && current.email) {
+        const dateText = expected ? new Date(expected).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric" }) : "Not specified";
+        const message = [
+          `Hello ${current.customerName || "Customer"},`,
+          "",
+          `Your MAHALAKSHMI STORE order for ${current.productName || "your product"} has an update.`,
+          `Delivery status: ${status}`,
+          `Expected delivery date: ${dateText}`,
+          note ? `Update: ${note}` : "",
+          "",
+          "You can open My Orders on our website to see the latest status.",
+          "Thank you for shopping with MAHALAKSHMI CLOTH CENTER AND FANCY STORE."
+        ].filter(Boolean).join("\\n");
+        try { emailSent = await sendStoreEmail(current.email, "MAHALAKSHMI STORE - Delivery update", message); }
+        catch (emailError) { console.error("Delivery update email failed:", emailError.message); }
+      }
+      res.json({ acknowledged: true, deliveryStatus: status, expectedDeliveryDate: expected, emailSent });
+    } catch (e) {
+      console.error("Delivery update error:", e.message);
+      res.status(500).json({ message: "Unable to update delivery status" });
+    }
+  });
 
   app.get(
     "/admin/products",

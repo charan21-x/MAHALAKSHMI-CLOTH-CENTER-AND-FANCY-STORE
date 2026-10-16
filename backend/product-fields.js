@@ -32,7 +32,7 @@ function productFields(body) {
   if ((deliveryMinDays === null) !== (deliveryMaxDays === null)) bad('Enter both delivery estimates');
   if (deliveryMinDays !== null && deliveryMaxDays < deliveryMinDays) bad('Maximum delivery days must be at least the minimum');
   return {
-    name, category: text('category', 80), price, stock, images,
+    name, category: text('category', 80), price, deliveryCharge: number('deliveryCharge', 100000, false) ?? 0, stock, images,
     image: images[0] || '', imageUrl: images[0] || '',
     description: text('description', 10000), details: text('details', 6000),
     returnDays: number('returnDays', 365), returnPolicy: text('returnPolicy', 2000),

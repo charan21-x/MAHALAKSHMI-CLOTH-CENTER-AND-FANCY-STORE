@@ -126,7 +126,7 @@ function renderOrders(box, orders, isNewList) {
   }
 
   const rows = orders.map(o => {
-    const total = Number(o.amountPaid ?? (Number(o.price || 0) * Number(o.quantity || 1)));
+    const total = Number(o.totalAmount ?? o.amountPaid ?? (Number(o.price || 0) * Number(o.quantity || 1)));
     const status = o.adminSeen === true ? '<span class="seen-pill">SEEN</span>' : '<span class="new-pill">NEW</span>';
     const image = productImageFor(o);
     const productHtml = image
@@ -175,7 +175,7 @@ async function openOrder(id, fromNew) {
 }
 
 function showOrderDetails(o) {
-  const total = Number(o.amountPaid ?? (Number(o.price || 0) * Number(o.quantity || 1)));
+  const total = Number(o.totalAmount ?? o.amountPaid ?? (Number(o.price || 0) * Number(o.quantity || 1)));
   const fullAddress = [o.doorNo, o.areaVillage, o.city, o.state, o.pincode].filter(Boolean).join(", ") || o.address || "-";
   const image = productImageFor(o);
   const imageBlock = image
@@ -189,14 +189,82 @@ function showOrderDetails(o) {
     ${detail("Email", o.email || "-")}
     ${detail("Product", o.productName || "-")}
     ${detail("Quantity", String(o.quantity || 1))}
-    ${detail("Amount", `₹${money(total)}`)}
+    ${detail("Product price", `₹${money(o.price || 0)}`)}
+    ${detail("Delivery charge", Number(o.deliveryCharge || 0) ? `₹${money(o.deliveryCharge)}` : "FREE")}
+    ${detail("Total amount", `₹${money(total)}`)}
     ${detail("Payment Method", o.paymentMethod || "-")}
     ${detail("Payment Status", o.paymentStatus || "-")}
     ${detail("Order Status", o.orderStatus || "-")}
+    ${detail("Delivery status", o.deliveryStatus || o.orderStatus || "Order placed")}
+    ${detail("Expected delivery", formatDate(o.expectedDeliveryDate))}
+    ${detail("Actual delivery", formatDate(o.actualDeliveryDate))}
     ${detail("Admin View", o.adminSeen ? "Seen" : "New")}
     ${detail("Delivery Address", fullAddress, true)}
-  </div>`;
+  </div>
+  <form id="deliveryUpdateForm" class="delivery-update-form">
+    <h3>Update delivery</h3>
+    <label>Delivery status
+      <select id="deliveryStatusInput">
+        ${["Order placed","Processing","Packed","Shipped","Out for delivery","Delivered","Delivery delayed","Cancelled"].map(value => `<option value="${value}" ${(o.deliveryStatus || o.orderStatus || "Order placed") === value ? "selected" : ""}>${value}</option>`).join("")}
+      </select>
+    </label>
+    <label>Expected delivery date
+      <input id="expectedDeliveryInput" type="date" value="${dateInputValue(o.expectedDeliveryDate)}">
+    </label>
+    <label>Customer update note (optional)
+      <input id="deliveryNoteInput" maxlength="300" placeholder="e.g. Courier pickup completed">
+    </label>
+    <button class="view-btn" type="submit" id="saveDeliveryUpdate">Save delivery update &amp; notify customer</button>
+    <p id="deliveryUpdateMessage" class="muted" role="status" aria-live="polite"></p>
+  </form>`;
   $("orderModal").classList.add("show");
+  $("deliveryUpdateForm").addEventListener("submit", saveDeliveryUpdate);
+}
+
+function dateInputValue(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "";
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(date);
+  const map = Object.fromEntries(parts.map(part => [part.type, part.value]));
+  return `${map.year}-${map.month}-${map.day}`;
+}
+
+async function saveDeliveryUpdate(event) {
+  event.preventDefault();
+  // The modal's first detail row contains the full order ID.
+  const idText = document.querySelector("#orderDetails .detail span")?.textContent || "";
+  const orderId = idText.trim();
+  const status = $("deliveryStatusInput").value;
+  const expectedDeliveryDate = $("expectedDeliveryInput").value;
+  const note = $("deliveryNoteInput").value.trim();
+  const button = $("saveDeliveryUpdate"), message = $("deliveryUpdateMessage");
+  const order = [...allOrders, ...newOrders].find(o => String(o._id) === orderId);
+  if (!order) { message.textContent = "Could not identify this order. Close and reopen it."; return; }
+  button.disabled = true; message.textContent = "Saving delivery update…";
+  try {
+    const result = await api(`/admin/orders/${encodeURIComponent(orderId)}/delivery`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ deliveryStatus: status, expectedDeliveryDate, note })
+    });
+    order.deliveryStatus = result.deliveryStatus;
+    order.orderStatus = result.deliveryStatus;
+    order.expectedDeliveryDate = result.expectedDeliveryDate;
+    if (status === "Delivered") order.actualDeliveryDate = order.actualDeliveryDate || new Date().toISOString();
+    message.textContent = result.emailSent
+      ? "Saved. Customer email notification sent."
+      : "Saved. Email was not sent (check Brevo setup or customer email). Website status is updated.";
+    showOrderDetails(order);
+    await loadOrders();
+    // Restore the message after re-rendering the modal.
+    $("deliveryUpdateMessage").textContent = message.textContent;
+  } catch (error) {
+    message.textContent = error.message || "Could not update delivery.";
+  } finally {
+    const activeButton = $("saveDeliveryUpdate");
+    if (activeButton) activeButton.disabled = false;
+  }
 }
 
 function detail(label, value, full = false) {

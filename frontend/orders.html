@@ -707,7 +707,7 @@
                     box.innerHTML = '<div class="panel"><h3>No orders found</h3><p class="muted">No orders are linked to this verified email yet.</p></div>';
                     return
                 }
-                box.innerHTML = list.map(o => `<article class="order-card"><div><h3>${esc(o.productName||"Product")}</h3><p class="muted">Order ID: ${esc(o._id)}</p><p class="muted">${esc(o.customerName||"")} • ${esc(o.city||"")}</p><span class="pill">${esc(o.orderStatus||"Placed")}</span></div><div><h3>₹${Number(o.price||0).toLocaleString("en-IN")}</h3><a class="btn" href="order-track.html?id=${encodeURIComponent(o._id)}">Track Order</a></div></article>`).join("")
+                box.innerHTML = list.map(o => `<article class="order-card"><div><h3>${esc(o.productName||"Product")}</h3><p class="muted">Order ID: ${esc(o._id)}</p><p class="muted">${esc(o.customerName||"")} • ${esc(o.city||"")}</p><span class="pill">${esc(o.deliveryStatus||o.orderStatus||"Placed")}</span><p class="muted">Expected delivery: ${esc(o.expectedDeliveryDate ? new Date(o.expectedDeliveryDate).toLocaleDateString("en-IN") : "Not updated yet")}</p></div><div><h3>₹${Number(o.totalAmount ?? o.amountPaid ?? (Number(o.price||0)*Number(o.quantity||1))).toLocaleString("en-IN")}</h3><a class="btn" href="order-track.html?id=${encodeURIComponent(o._id)}">Track Order</a></div></article>`).join("")
             } catch (e) {
                 box.innerHTML = '<div class="panel danger-text">' + esc(e.message) + '</div>'
             }

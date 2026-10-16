@@ -22,3 +22,8 @@ table{width:100%;border-collapse:collapse}th,td{padding:11px;border-bottom:1px s
 .message{min-height:20px;margin-top:8px;color:#b91c1c}.success{color:#166534}
 [hidden]{display:none!important}
 @media(max-width:700px){.product-form,.stats{grid-template-columns:1fr}.topbar{align-items:flex-start}.full{grid-column:auto}}
+
+.delivery-update-form { margin-top: 20px; padding: 16px; border: 1px solid #dbe3ef; border-radius: 14px; background: #f8fafc; display: grid; gap: 12px; }
+.delivery-update-form h3 { margin: 0; }
+.delivery-update-form label { display: grid; gap: 6px; font-weight: 700; }
+.delivery-update-form input, .delivery-update-form select { width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font: inherit; background: white; }

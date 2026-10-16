@@ -297,14 +297,21 @@
         const statusBox = document.getElementById("status");
         const button = document.getElementById("placeOrderBtn");
 
+        const productPrice = Number(d.product.price || 0);
+        const deliveryCharge = Math.max(0, Number(d.product.deliveryCharge || 0));
+        const minDays = d.product.deliveryMinDays == null ? null : Number(d.product.deliveryMinDays);
+        const maxDays = d.product.deliveryMaxDays == null ? null : Number(d.product.deliveryMaxDays);
+        const deliveryEstimate = minDays != null && maxDays != null
+            ? `${minDays === maxDays ? maxDays : `${minDays}–${maxDays}`} day(s)`
+            : maxDays != null ? `Within ${maxDays} day(s)` : "Within 7 days (estimate)";
         document.getElementById("summary").innerHTML =
             `<div class="summary">
-    <span>${esc(d.product.name)} × 1</span>
-    <b>₹${Number(d.product.price || 0).toLocaleString("en-IN")}</b>
+    <span>${esc(d.product.name)} × 1</span><b>₹${productPrice.toLocaleString("en-IN")}</b>
+    <span>Delivery charge</span><b>${deliveryCharge ? "₹"+deliveryCharge.toLocaleString("en-IN") : "FREE"}</b>
+    <span>Estimated delivery</span><b>${esc(deliveryEstimate)}</b>
+    <span><strong>Total amount</strong></span><b>₹${(productPrice+deliveryCharge).toLocaleString("en-IN")}</b>
   </div>
-  <p class="muted">
-    Deliver to: ${esc(d.areaVillage)}, ${esc(d.city)} - ${esc(d.pincode)}
-  </p>`;
+  <p class="muted">Deliver to: ${esc(d.areaVillage)}, ${esc(d.city)} - ${esc(d.pincode)}</p>`;
 
         document.querySelectorAll('input[name="pay"]').forEach(input => {
             input.addEventListener("change", () => {

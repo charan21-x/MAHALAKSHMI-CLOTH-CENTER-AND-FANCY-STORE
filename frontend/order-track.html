@@ -534,8 +534,8 @@
 
         function paintStatus(status) {
             const order = ["placed", "confirmed", "shipped", "delivered"];
-            let s = String(status || "Placed").toLowerCase();
-            let idx = s.includes("deliver") ? 3 : s.includes("ship") ? 2 : s.includes("confirm") || s.includes("process") || s.includes("prepar") ? 1 : 0;
+            let s = String(status || "Order placed").toLowerCase();
+            let idx = s.includes("delivered") ? 3 : s.includes("ship") || s.includes("out for delivery") ? 2 : s.includes("confirm") || s.includes("process") || s.includes("prepar") || s.includes("pack") ? 1 : 0;
             document.querySelectorAll(".track").forEach((n, i) => n.classList.toggle("done", i <= idx))
         }
         async function load() {
@@ -562,9 +562,12 @@
                     return
                 }
                 if (!r.ok) throw Error(o.message || "Order not found");
-                document.getElementById("info").innerHTML = `<div class="summary"><span>${esc(o.productName||"Product")}</span><b>₹${Number(o.price||0).toLocaleString("en-IN")}</b></div><p><b>Customer:</b> ${esc(o.customerName||"")}</p><p><b>Payment:</b> ${esc(o.paymentMethod||"")}</p><p><b>Status:</b> ${esc(o.orderStatus||"Placed")}</p><p><b>Address:</b> ${esc(o.address||"")}</p>`;
+                const total = Number(o.totalAmount ?? o.amountPaid ?? (Number(o.price||0)*Number(o.quantity||1)));
+                const dateText = value => value ? new Date(value).toLocaleDateString("en-IN") : "Not updated yet";
+                const history = Array.isArray(o.deliveryHistory) ? o.deliveryHistory.slice().reverse() : [];
+                document.getElementById("info").innerHTML = `<div class="summary"><span>${esc(o.productName||"Product")} · Product price</span><b>₹${Number(o.price||0).toLocaleString("en-IN")}</b><span>Delivery charge</span><b>${Number(o.deliveryCharge||0) ? "₹"+Number(o.deliveryCharge).toLocaleString("en-IN") : "FREE"}</b><span><strong>Total</strong></span><b>₹${total.toLocaleString("en-IN")}</b></div><p><b>Customer:</b> ${esc(o.customerName||"")}</p><p><b>Payment:</b> ${esc(o.paymentMethod||"")}</p><p><b>Delivery status:</b> ${esc(o.deliveryStatus||o.orderStatus||"Order placed")}</p><p><b>Expected delivery:</b> ${esc(dateText(o.expectedDeliveryDate))}</p><p><b>Delivered on:</b> ${esc(dateText(o.actualDeliveryDate))}</p><p><b>Address:</b> ${esc(o.address||"")}</p><section class="panel"><h3>Delivery update history</h3>${history.length ? history.map(item=>`<p><b>${esc(item.status||"Update")}</b> · ${esc(dateText(item.at))}${item.note ? `<br>${esc(item.note)}` : ""}</p>`).join("") : '<p class="muted">No delivery updates yet.</p>'}</section>`;
                 document.getElementById("timeline").classList.remove("hidden");
-                paintStatus(o.orderStatus)
+                paintStatus(o.deliveryStatus||o.orderStatus)
             } catch (e) {
                 document.getElementById("info").innerHTML = "<p class='danger-text'>" + esc(e.message) + "</p><p><a class='btn' href='orders.html'>Back to My Orders</a></p>"
             }

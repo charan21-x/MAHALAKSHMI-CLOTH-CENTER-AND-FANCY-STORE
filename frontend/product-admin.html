@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Manage products | Mahalakshmi Store</title><link rel="stylesheet" href="store-products.css"><script src="product-admin.js" defer></script></head><body>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Manage products | Mahalakshmi Store</title><link rel="stylesheet" href="store-products.css"><script src="product-admin.js?v=delivery-1" defer></script></head><body>
 <header class="store-header"><a class="store-brand" href="index.html">MAHALAKSHMI STORE</a><span>Product management</span></header><main class="store-shell">
 <section id="loginPanel" class="store-panel"><h1>Admin login</h1><form id="loginForm" class="store-form"><label>Username<input id="username" required autocomplete="username"></label><label>Password<input id="password" type="password" required autocomplete="current-password"></label><button class="store-button" id="loginButton">Sign in</button></form></section>
 <p id="message" class="store-message" role="status" aria-live="polite"></p>
@@ -6,7 +6,7 @@
 <section class="store-panel"><div class="store-row"><h2 id="formTitle">Add product</h2><button id="cancelEdit" class="store-button secondary" hidden>Cancel edit</button></div>
 <form id="productForm" class="store-form"><input id="productId" type="hidden">
 <label>Name<input id="name" required maxlength="150"></label><label>Category<input id="category" maxlength="80" placeholder="Sarees, jewellery, accessories"></label>
-<label>Price (₹)<input id="price" type="number" min="0" max="10000000" step="0.01" required></label><label>Stock quantity<input id="stock" type="number" min="0" max="1000000" step="1" required></label>
+<label>Price (₹)<input id="price" type="number" min="0" max="10000000" step="0.01" required></label><label>Delivery charge (₹)<input id="deliveryCharge" type="number" min="0" max="100000" step="0.01" value="0" required><small>Set a different delivery charge for this product. Use 0 for free delivery.</small></label><label>Stock quantity<input id="stock" type="number" min="0" max="1000000" step="1" required></label>
 <label class="wide">Product photos<input id="imageFiles" type="file" accept="image/jpeg,image/png,image/webp" multiple><small>Upload up to 10 photos. You can select many together OR choose them one-by-one. The first photo is shown on the home page; opening the product shows all photos.</small></label>
 <div id="imagePreview" class="store-thumbs wide" aria-label="Image previews"></div>
 <label class="wide">Full description<textarea id="description" rows="6" maxlength="10000"></textarea></label>

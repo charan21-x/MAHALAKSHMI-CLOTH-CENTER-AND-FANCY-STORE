@@ -11,7 +11,7 @@
   let previewObjectUrls = [];
 
   const fields = [
-    'name','category','price','stock','description','details',
+    'name','category','price','deliveryCharge','stock','description','details',
     'deliveryMinDays','deliveryMaxDays','returnDays','returnPolicy'
   ];
 
@@ -156,7 +156,7 @@
       return `<tr>
         <td>${validURL(cover) ? `<img src="${escape(cover)}" alt="${escape(p.name)}" loading="lazy">` : 'No photo'}</td>
         <td>${escape(p.name)}<br><small>${escape(p.category)}</small></td>
-        <td>₹${Number(p.price).toLocaleString('en-IN')}</td>
+        <td>₹${Number(p.price).toLocaleString('en-IN')}<br><small>Delivery: ${Number(p.deliveryCharge||0) ? '₹'+Number(p.deliveryCharge).toLocaleString('en-IN') : 'FREE'}</small></td>
         <td>${Number(p.stock) || 0}</td>
         <td>${p.isActive === false ? 'Hidden' : 'Visible'}</td>
         <td>
@@ -397,7 +397,7 @@
       fields.map(key => [key, $(key).value.trim()])
     );
 
-    ['price','stock','returnDays','deliveryMinDays','deliveryMaxDays'].forEach(key => {
+    ['price','deliveryCharge','stock','returnDays','deliveryMinDays','deliveryMaxDays'].forEach(key => {
       data[key] = data[key] === '' ? null : Number(data[key]);
     });
 
